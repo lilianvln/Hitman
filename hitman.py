@@ -36,16 +36,34 @@ class HC(Enum):
 
 
 # Provisoire...
-world_example = [
+"""world_example = [
     [HC.EMPTY, HC.EMPTY, HC.EMPTY, HC.SUIT, HC.GUARD_S, HC.WALL, HC.WALL],
     [HC.EMPTY, HC.WALL, HC.EMPTY, HC.EMPTY, HC.EMPTY, HC.EMPTY, HC.EMPTY],
     [HC.TARGET, HC.WALL, HC.EMPTY, HC.EMPTY, HC.EMPTY, HC.CIVIL_N, HC.EMPTY],
     [HC.WALL, HC.WALL, HC.EMPTY, HC.GUARD_E, HC.EMPTY, HC.CIVIL_W, HC.CIVIL_E],
     [HC.EMPTY, HC.EMPTY, HC.EMPTY, HC.EMPTY, HC.EMPTY, HC.EMPTY, HC.EMPTY],
     [HC.EMPTY, HC.EMPTY, HC.WALL, HC.WALL, HC.EMPTY, HC.PIANO_WIRE, HC.EMPTY],
+]"""
+
+world_example = [
+    [HC.GUARD_E, HC.EMPTY, HC.CIVIL_S],
+    [HC.WALL, HC.EMPTY, HC.EMPTY],
+    [HC.EMPTY, HC.EMPTY, HC.WALL]
 ]
 
 complete_map_example = {
+    (0, 2):HC.GUARD_E,
+    (1, 2):HC.EMPTY,
+    (2, 2):HC.CIVIL_S,
+    (0, 1):HC.WALL,
+    (1, 1):HC.EMPTY,
+    (2, 1):HC.EMPTY,
+    (0, 0):HC.EMPTY,
+    (1, 0):HC.EMPTY,
+    (2, 0):HC.WALL
+}
+
+"""complete_map_example = {
     (0, 5): HC.EMPTY,
     (1, 5): HC.EMPTY,
     (2, 5): HC.EMPTY,
@@ -88,7 +106,7 @@ complete_map_example = {
     (4, 0): HC.EMPTY,
     (5, 0): HC.PIANO_WIRE,
     (6, 0): HC.EMPTY,
-}
+}"""
 
 
 class HitmanReferee:

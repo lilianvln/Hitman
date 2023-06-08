@@ -18,7 +18,7 @@ def print_plateau(plateau):
     for i in range(lignes):
         if i == 0: # Première ligne
             print("┌" + "─" * (15 * colonnes + colonnes - 1) + "┐")
-        else: # Autre lignes
+        else: # Autres lignes
             print("├" + "─" * (15 * colonnes + colonnes - 1) + "┤")
         for j in plateau[i]:
             print("│{:^14} ".format(j), end="")
@@ -46,7 +46,7 @@ def voir(vision, plateau):  # remplit le tableau de ce qui est vu
     return plateau
 
 
-def entendre(position, hear, plateau):
+def entendre(position, entend, tab):
     M = len(plateau) - 1
     N = len(plateau[0]) - 1
     y_pos, x_pos = position
@@ -66,23 +66,38 @@ def entendre(position, hear, plateau):
     if y_min < 0:
         y_min = 0
 
-    if hear == 0: # Aucune personne entendu
-        for x in range(x_min, x_max+1):
-            for y in range(y_min, y_max+1):
-                if plateau[M-x][y] == "non_etudie":
-                    plateau[M-x][y] = "personne"
+    if entend == 0:  # si on n'entend rien, il n'y a personne autour
+        for i in range(x_min, x_max + 1):
+            for j in range(y_min, y_max + 1):
+                if tab[i][j] in ["non_etudie", "qqn_pe"]:
+                    tab[i][j] = "personne"
+    else:  # on entend des gens
+        nb_personne = 0
+        non_connue = 0
+        for i in range(x_min, x_max + 1):
+            for j in range(y_min, y_max + 1):
+                if tab[i][j] in [HC.CIVIL_N, HC.CIVIL_E, HC.CIVIL_S, HC.CIVIL_W,
+                                 HC.GUARD_N, HC.GUARD_E, HC.GUARD_S, HC.GUARD_W]:
+                    nb_personne += 1  # compte les personnes connues autour
+                if tab[i][j] in ["non_etudie", "qqn_sur", "qqn_pe"]:
+                    non_connue += 1  # compte les cases dont on ne connait pas le contenu et qui pourraient contenir qqn
+        if nb_personne == entend:  # si on a déjà placé toutes les personnes qu'on entend
+            for i in range(x_min, x_max + 1):
+                for j in range(y_min, y_max + 1):
+                    if tab[i][j] in ["non_etudie", "qqn_pe"]:
+                        tab[i][j] = "personne"  # ni civil ni garde
+        elif (non_connue + nb_personne) == entend:  # Le nombre de case inconnue correspond au nombre de personnes qu'il reste à placer
+            for i in range(x_min, x_max + 1):
+                for j in range(y_min, y_max + 1):
+                    if tab[i][j] in ["non_etudie", "qqn_pe"]:
+                        tab[i][j] = "qqn_sur"
+        else:  # on sait qu'il y a du monde, mais pas où
+            for i in range(x_min, x_max + 1):
+                for j in range(y_min, y_max + 1):
+                    if tab[i][j] in ["non_etudie"]:
+                        tab[i][j] = "qqn_pe"  # il y a peut être qqn
+    return tab
 
-    elif hear in [1,2,3,4,5]:
-        for x in range(x_min, x_max+1):
-            for y in range(y_min, y_max+1):
-                if plateau[M-x][y] in [HC.CIVIL_N, HC.CIVIL_S, HC.CIVIL_E, HC.CIVIL_W,
-                                        HC.GUARD_N, HC.GUARD_S, HC.GUARD_E, HC.GUARD_W]:
-                    nb_personne_vue += 1
-        if nb_personne_vue != hear: #
-            for x in range(x_min, x_max + 1):
-                for y in range(y_min, y_max + 1):
-                    if plateau[M - x][y] == "non_etudie":
-                        plateau[M - x][y] = "pe_qlqn"
 
 
 def anaylse(hr, position, orientation, plateau):
@@ -124,10 +139,19 @@ def deplacement(hr, vision, position, orientation, plateau):
 
 
 
-plateau = model_plateau(6, 7)
+plateau = model_plateau(3, 3)
 
 
 hr = HitmanReferee()
+(vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
+print(f"personne entendu : {hear}")
+print(f"position : {position}")
+entendre(position, hear, plateau)
+voir(vision, plateau)
+anaylse(hr, position, orientation, plateau)
+print_plateau(plateau)
+
+hr.turn_clockwise()
 (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
 print(f"personne entendu : {hear}")
 print(f"position : {position}")
@@ -145,8 +169,14 @@ voir(vision, plateau)
 anaylse(hr, position, orientation, plateau)
 print_plateau(plateau)
 
-
-
+hr.turn_anti_clockwise()
+(vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
+print(f"personne entendu : {hear}")
+print(f"position : {position}")
+entendre(position, hear, plateau)
+voir(vision, plateau)
+anaylse(hr, position, orientation, plateau)
+print_plateau(plateau)
 
 
 """

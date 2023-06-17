@@ -25,3 +25,9 @@
 ## Phase n°3 :
 - [ ] Faire un compte rendu avec : 
   - Un rapport incluant vos modélisations et résumant les forces et faiblesses de vos programmes.
+
+
+## Déplacement :
+
+- Lorsque l'on est sur le bord de la carte -> Ligne 0, N ou Colonne 0, M moins de possibilité.
+- Si on est face à un mur -> tourner à droite 

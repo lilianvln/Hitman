@@ -1,3 +1,5 @@
+import random
+
 import numpy as np
 from hitman import *
 
@@ -39,12 +41,15 @@ def call_arbitre(hr):
 
 def premier_appel(hr):
     status = hr.start_phase1()
+    y_pos, x_pos = status["position"]
     guard_count = status["guard_count"]
     civil_count = status["civil_count"]
     N = status["n"]
     M = status["m"]
-    tab = model_plateau(M, N)
-    return N, M, tab, guard_count, civil_count
+    plateau = model_plateau(M, N)
+    ligne = len(plateau) - 1
+    plateau[ligne - x_pos][y_pos] = "personne"
+    return N, M, plateau, guard_count, civil_count
 
 
 def voir(vision, plateau):  # remplit le tableau de ce qui est vu
@@ -110,7 +115,7 @@ def entendre(position, entend, tab):
     return tab
 
 
-def anaylse(hr, position, orientation, plateau):
+"""def anaylse(hr, position, orientation, plateau):
     y_pos, x_pos = position
     M = len(plateau) - 1
     N = len(plateau[0]) - 1
@@ -127,9 +132,8 @@ def anaylse(hr, position, orientation, plateau):
             (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
             entendre(position, hear, plateau)
             voir(vision, plateau)
-
-
-def deplacement(hr, vision, position, orientation, plateau):
+"""
+"""def deplacement(hr, vision, position, orientation, plateau):
     y_pos, x_pos = position
     M = len(plateau) - 1
     N = len(plateau[0]) - 1
@@ -139,28 +143,51 @@ def deplacement(hr, vision, position, orientation, plateau):
         (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
         entendre(position, hear, plateau)
         voir(vision, plateau)
+"""
 
 
-def heuristique(courante, destination):
-    return abs(courante[0] - destination[0]) + abs(courante[1] - destination[1])
+def turn_clockwise(hr):
+    hr.turn_clockwise()
+    (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
+    voir(vision, plateau)
+    hr.move()
+    (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
+    voir(vision, plateau)
+
+
+def turn_anti_clockwise(hr):
+    hr.turn_anti_clockwise()
+    (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
+    voir(vision, plateau)
+    hr.move()
+    (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
+    voir(vision, plateau)
+
+
+def move(hr):
+    hr.move()
+    (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
+    voir(vision, plateau)
 
 
 def remaining_empty_cases(tableau):
     for ligne in tableau:
         for case in ligne:
-            if case == "non_etudie":
+            if case == "non_etudie" or case == "qqn_pe":
                 return True
     return False
 
-def count_qqn_pe_cases(tableau):
-    count = 0
+
+def count_qqn_pe_sur_cases(tableau):
+    count_qqn_pe_sur = 0
     for ligne in tableau:
         for case in ligne:
-            if isinstance(case, str) and case == "qqn_pe" \
-                    or case == HC.GUARD_N or case == HC.GUARD_S or case == HC.GUARD_E or case == HC.GUARD_W\
-                    or case == HC.CIVIL_N or case == HC.CIVIL_S or case == HC.CIVIL_E or case == HC.CIVIL_W:
-                count += 1
-    return count
+            if isinstance(case, str) and (case == "qqn_pe" or case == "qqn_sur"):
+                count_qqn_pe_sur += 1
+            if isinstance(case, str) and (case == HC.GUARD_N or case == HC.GUARD_S or case == HC.GUARD_E or case == HC.GUARD_W or
+                                        case == HC.CIVIL_N or case == HC.CIVIL_S or case == HC.CIVIL_E or case == HC.CIVIL_W):
+                count_qqn_pe_sur -= 1
+    return count_qqn_pe_sur
 
 
 def parcours_plateau(hr):
@@ -213,31 +240,38 @@ def parcours_plateau(hr):
     print(f"case droite : {case_droite}")
     print(f"case gauche : {case_gauche}")
 
-    if (case_devant != None) and case_devant == HC.EMPTY:  # Si la case devant est vide avancer
-        hr.move()
-        (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
-        voir(vision, plateau)
-        print("Hitman avance")
+    choix_tab = []
 
-    else:  # Si la case devant est plein
-        if (case_droite != None) and (
-                case_droite == HC.EMPTY or case_droite == "qqn_pe" or case_droite == "non_etudie" or case_droite == "personne"):
-            hr.turn_clockwise()
-            (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
-            voir(vision, plateau)
-            hr.move()
-            (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
-            voir(vision, plateau)
+    if (case_devant != None) and (case_devant == HC.EMPTY or case_devant == "qqn_pe" or case_devant == "non_etudie" or case_devant == "personne"):  # Si la case devant est vide avancer
+        choix_tab.append(0)
+
+    if (case_droite != None) and (case_droite == HC.EMPTY or case_droite == "qqn_pe" or case_droite == "non_etudie" or case_droite == "personne"):
+        choix_tab.append(1)
+
+    if (case_gauche != None) and (case_gauche == HC.EMPTY or case_gauche == "qqn_pe" or case_gauche == "non_etudie" or case_gauche == "personne"):
+        choix_tab.append(2)
+
+    if choix_tab != []:
+        choix = random.choice(choix_tab)
+        print(choix_tab)
+        if choix == 0:
+            move(hr)
+            print("Hitman avance")
+        elif choix == 1:
+            turn_clockwise(hr)
             print("Hitman tourne à droite et avance")
-        elif (case_gauche != None) and (case_gauche == HC.EMPTY or case_gauche == "qqn_pe" or case_gauche == "non_etudie" or case_gauche == "personne"):
-            hr.turn_anti_clockwise()
-            (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
-            voir(vision, plateau)
-            hr.move()
-            (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
-            voir(vision, plateau)
+        else:
+            turn_anti_clockwise(hr)
             print("Hitman tourne à gauche et avance")
-    print("---------------------------------------------------------------------------------------")
+        print("---------------------------------------------------------------------------------------")
+        return 1
+    else :
+        print("Hitman est bloqué")
+        print("---------------------------------------------------------------------------------------")
+        breakpoint()
+        return 0
+
+
 
 # --------------------------------------------------------------------------------------------------------------------------------#
 
@@ -248,11 +282,13 @@ hr = HitmanReferee()
 
 (N, M, plateau, guard_count, civil_count) = premier_appel(hr)
 
+parcours_idx = 0
+while remaining_empty_cases(plateau) or count_qqn_pe_sur_cases(plateau) != guard_count+civil_count:
+    res = parcours_plateau(hr)
+    print(res)
+    parcours_idx += 1
 
-while remaining_empty_cases(plateau):
-    while count_qqn_pe_cases(plateau) != guard_count+civil_count:
-        print(count_qqn_pe_cases(plateau))
-        parcours_plateau(hr)
+print(parcours_idx)
 
 """(vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
 

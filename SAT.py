@@ -158,12 +158,12 @@ def position_to_num_case(x, y, N) :
     return N*y+x
 def unique_element_par_case_i(x, y, N) :
     #retourne une liste de clauses il y a un unique element dans cette case
-    res = []
+    liste = []
     case = position_to_num_case(x, y, N)
     numVar = case*12
     for i in range (numVar, numVar+12) :
-        list.append(i)
-    res = unique(i)
+        liste.append(i)
+    res = unique(liste)
     return res
 
 def unique_element_par_case_plateau(N, M) :
@@ -260,6 +260,46 @@ def vision_to_dimacs(x, y, vue, N, M) :
         return var_mur(N, M)[case]
     if vue == HC.TARGET :
         return var_cible(N, M)[case]
+
+def dimacs(hr) :
+    status = hr.start_phase1()
+    gardes = status["guard_count"]
+    civils = status["civil_count"]
+    N = status["n"]
+    M = status["m"]
+    tab = []
+    c = 0
+    for el in unique_element_par_case_plateau(N,M) :
+        el.append(0)
+        tab.append(el)
+        c+=1
+    for el in unique_cible(N,M) :
+        el.append(0)
+        tab.append(el)
+        c += 1
+    for el in unique_costume(N, M) :
+        el.append(0)
+        tab.append(el)
+        c += 1
+    for el in unique_corde(N,M) :
+        el.append(0)
+        tab.append(el)
+        c += 1
+    for el in exactement_nb_civils(civils, N, M) :
+        el.append(0)
+        tab.append(el)
+        c += 1
+    for el in exactement_nb_gardes(gardes, N, M) :
+        el.append(0)
+        tab.append(el)
+        c += 1
+    return tab, c
+
+
+hr = HitmanReferee()
+tab, c = dimacs(hr)
+print (tab)
+print (c)
 
 def write_dimacs_file(dimacs: str, filename: str):
     with open(filename, "w", newline="") as cnf:

@@ -190,11 +190,10 @@ def garde_unique_direction(N, M) : # déja fait avec le unique élément par cas
 
 def unique(listVar) :
     res = []
-    for i in range (len(listVar)) :
-        res[i].append(listVar[i])
-        for j in range (len(listVar)) :
-            if i != j :
-                res[i].append(-listVar[j])
+    res.append(listVar)
+    for i in range(len(listVar)):
+        for j in range(i + 1, len(listVar)):
+            res.append([-listVar[i], -listVar[j]])
     return res
 
 def unique_corde(N, M) :
@@ -207,16 +206,22 @@ def unique_cible(N, M) :
     return unique(var_cible(N,M))
 
 def exactement_nb_vraies(liste, nb):
+    num_variables = len(liste)
     res = []
 
+    # Au moins cinq variables doivent être vraies
+    res.append([liste[i] for i in range(num_variables)])
+
+    # Au plus cinq variables peuvent être vraies
+    for i in range(num_variables):
+        for j in range(i + 1, num_variables):
+            res.append([-liste[i], -liste[j]])
+
+    # Exactement cinq variables doivent être vraies
     combinations = itertools.combinations(liste, nb)
     for combination in combinations:
         res.append(list(combination))
 
-    for clause in res :
-        for i in liste :
-            if i not in clause :
-                clause.append(-i)
     return res
 
 def exactement_nb_gardes(nb, N, M) :
@@ -226,6 +231,35 @@ def exactement_nb_gardes(nb, N, M) :
 def exactement_nb_civils(nb, N, M) :
     liste = varCivil(N, M)
     return exactement_nb_vraies(liste, nb)
+
+def vision_to_dimacs(x, y, vue, N, M) :
+    case = position_to_num_case(x, y, N)
+    if vue == HC.EMPTY :
+        return var_vide(N,M)[case]
+    if vue == HC.CIVIL_E :
+        return var_civilE(N, M)[case]
+    if vue == HC.CIVIL_N :
+        return var_civilN(N, M)[case]
+    if vue == HC.CIVIL_S :
+        return var_civilN(N, M)[case]
+    if vue == HC.CIVIL_W:
+        return var_civilN(N, M)[case]
+    if vue == HC.GUARD_E :
+        return var_guardE(N, M)[case]
+    if vue == HC.GUARD_N :
+        return var_guardN(N, M)[case]
+    if vue == HC.GUARD_W :
+        return var_guardW(N, M)[case]
+    if vue == HC.GUARD_S :
+        return var_guardS(N, M)[case]
+    if vue == HC.PIANO_WIRE :
+        return var_corde(N, M)[case]
+    if vue == HC.SUIT :
+        return var_costume(N, M)[case]
+    if vue == HC.WALL :
+        return var_mur(N, M)[case]
+    if vue == HC.TARGET :
+        return var_cible(N, M)[case]
 
 def write_dimacs_file(dimacs: str, filename: str):
     with open(filename, "w", newline="") as cnf:

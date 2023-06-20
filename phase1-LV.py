@@ -63,7 +63,7 @@ def voir(vision, plateau):  # remplit le tableau de ce qui est vu
         x = ligne - i[0][1]
         y = i[0][0]
         plateau[x][y] = i[1]
-    return plateau
+    pass
 
 
 def entendre(position, entend, plateau):
@@ -117,11 +117,11 @@ def entendre(position, entend, plateau):
                 for j in range(y_min, y_max + 1):
                     if plateau[i][j] in ["non_etudie"]:
                         plateau[i][j] = "qqn_pe"  # il y a peut être qqn
-    return plateau
+    pass
 
 
 # -----------------------------------------MOUVEMENT HITMAN------------------------------------------------------------#
-def turn_clockwise(hr):
+def turn_clockwise(hr, plateau):
     hr.turn_clockwise()
     (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
     voir(vision, plateau)
@@ -133,7 +133,7 @@ def turn_clockwise(hr):
     return False
 
 
-def turn_anti_clockwise(hr):
+def turn_anti_clockwise(hr, plateau):
     hr.turn_anti_clockwise()
     (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
     voir(vision, plateau)
@@ -145,7 +145,7 @@ def turn_anti_clockwise(hr):
     return False
 
 
-def move(hr):
+def move(hr, plateau):
     hr.move()
     (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
     voir(vision, plateau)
@@ -154,7 +154,7 @@ def move(hr):
     return False
 
 
-def U_turn(hr):
+def U_turn(hr, plateau):
     hr.turn_clockwise()
     (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
     voir(vision, plateau)
@@ -251,61 +251,66 @@ def parcours_plateau(hr, plateau):
     choix_tab = []
 
     for i in range(len(vision)):
-        if vision[i][1] == HC.EMPTY or vision[i][1] == "personne" or vision[i][1] == "non_etudie":
+        if vision[i][1] == HC.EMPTY or vision[i][1] == "personne" or vision[i][1] == "non_etudie" or vision[i][1] == HC.CIVIL_N or vision[i][1] == HC.CIVIL_S or vision[i][1] == HC.CIVIL_E or vision[i][1] == HC.CIVIL_W:
                 choix_tab.append(0)
 
-    if (case_droite != None) and (
-            case_droite == HC.EMPTY or case_droite == "qqn_pe" or case_droite == "non_etudie" or case_droite == "personne"):
+    if (case_droite != None) and (case_droite == HC.EMPTY or case_droite == "qqn_pe" or case_droite == "non_etudie" or case_droite == "personne" or case_droite == HC.CIVIL_N or case_droite == HC.CIVIL_S or case_droite == HC.CIVIL_E or case_droite == HC.CIVIL_W):
         choix_tab.append(1)
 
-    if (case_gauche != None) and (
-            case_gauche == HC.EMPTY or case_gauche == "qqn_pe" or case_gauche == "non_etudie" or case_gauche == "personne"):
+    if (case_gauche != None) and (case_gauche == HC.EMPTY or case_gauche == "qqn_pe" or case_gauche == "non_etudie" or case_gauche == "personne" or case_gauche == HC.CIVIL_N or case_gauche == HC.CIVIL_S or case_gauche == HC.CIVIL_E or case_gauche == HC.CIVIL_W):
         choix_tab.append(2)
-    if choix_tab != []:
+
+    if choix_tab:
         choix = random.choice(choix_tab)
         if choix == 0:
             print("Hitman avance")
-            garde_range = move(hr)
+            garde_range = move(hr, plateau)
             points = 1
             return points, garde_range
         elif choix == 1:
             print("Hitman tourne à droite et avance")
-            garde_range = turn_clockwise(hr)
+            garde_range = turn_clockwise(hr, plateau)
             points = 2
             return points, garde_range
         else:
             print("Hitman tourne à gauche et avance")
-            garde_range = turn_anti_clockwise(hr)
+            garde_range = turn_anti_clockwise(hr, plateau)
             points = 2
             return points, garde_range
     else:
         # Implémenter fonction demi-tour pour éviter que hitman soit bloqué.
         print("Hitman fait demi-tour")
-        garde_range = U_turn(hr)
+        garde_range = U_turn(hr, plateau)
         points = 2
         return points, garde_range
 
 
+# -----------------------------------------RUN------------------------------------------------------------------------#
+
+
+def main():
+    hr = HitmanReferee()
+
+    (N, M, plateau, guard_count, civil_count) = premier_appel(hr)
+
+    points_parcours = 0
+    point_garde_range = 0
+    while (cases_non_etudie(plateau) or not cases_target(plateau)) and count_personne_decouverte(plateau) != guard_count + civil_count:  # Teste s'il reste des cases vides et si on a trouvé la cible.
+        points_action, garde_range = parcours_plateau(hr, plateau)
+        points_parcours += points_action
+        if garde_range:
+            points_action += 5
+            point_garde_range += 1
+            print(f"Hitman a été vu !!")
+        print(f"Point d'action : {points_parcours}")
+        print("----------------------------------------------------------------------------------------------------------------")
+    return plateau, points_parcours, point_garde_range
+
 # -----------------------------------------MAIN------------------------------------------------------------------------#
 
-hr = HitmanReferee()
+plateau, points_parcours, point_garde_range = main()
 
-(N, M, plateau, guard_count, civil_count) = premier_appel(hr)
-
-points_parcours = 0
-point_garde_range = 0
-while (cases_non_etudie(plateau) or not cases_target(plateau)) and count_personne_decouverte(plateau) != guard_count + civil_count:  # Teste s'il reste des cases vides et si on a trouvé la cible.
-    points_action, garde_range = parcours_plateau(hr, plateau)
-    points_parcours += points_action
-    if garde_range:
-        points_action += 5
-        point_garde_range += 1
-        print(f"Hitman a été vu !!")
-    print(f"Point d'action : {points_parcours}")
-    print("----------------------------------------------------------------------------------------------------------------")
-
-print(
-    "--------------------------------------------------PLATEAU FINAL-------------------------------------------------")
+print("--------------------------------------------------PLATEAU FINAL-------------------------------------------------")
 print_plateau(plateau)
 print(f"Point d'action : {points_parcours}")
 print(f"Nombre de fois ou Hitman a été vue : {point_garde_range}")

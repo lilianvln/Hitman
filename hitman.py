@@ -63,7 +63,7 @@ complete_map_example1 = {
     (2, 0):HC.WALL
 }
 
-complete_map_example = {
+complete_map_example0 = {
     (0, 5): HC.EMPTY,
     (1, 5): HC.EMPTY,
     (2, 5): HC.EMPTY,

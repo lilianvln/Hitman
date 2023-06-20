@@ -115,66 +115,38 @@ def entendre(position, entend, tab):
     return tab
 
 
-"""def anaylse(hr, position, orientation, plateau):
-    y_pos, x_pos = position
-    M = len(plateau) - 1
-    N = len(plateau[0]) - 1
-    if orientation == HC.N:
-        if plateau[M - x_pos][y_pos + 1] == "personne" or plateau[M - x_pos][y_pos + 1] == "pe_qlqn" or \
-                plateau[M - x_pos][y_pos + 1] == "non_etudie":
-            hr.turn_clockwise()
-            (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
-            entendre(position, hear, plateau)
-            voir(vision, plateau)
-        elif plateau[M - x_pos][y_pos - 1] == "personne" or plateau[M - x_pos][y_pos - 1] == "pe_qlqn" or \
-                plateau[M - x_pos][y_pos - 1] == "non_etudie":
-            hr.turn_anti_clockwise()
-            (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
-            entendre(position, hear, plateau)
-            voir(vision, plateau)
-"""
-"""def deplacement(hr, vision, position, orientation, plateau):
-    y_pos, x_pos = position
-    M = len(plateau) - 1
-    N = len(plateau[0]) - 1
 
-    if vision[0] == HC.WALL:
-        hr.turn_clockwise()
-        (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
-        entendre(position, hear, plateau)
-        voir(vision, plateau)
-"""
-
-
-def turn_clockwise(hr, points):
+def turn_clockwise(hr):
     hr.turn_clockwise()
-    points += 1
     (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
     voir(vision, plateau)
     hr.move()
     (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
     voir(vision, plateau)
-    return points
+    if guard_range:
+        return True
+    return False
 
-def turn_anti_clockwise(hr, points):
+
+def turn_anti_clockwise(hr):
     hr.turn_anti_clockwise()
-    points += 1
     (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
     voir(vision, plateau)
     hr.move()
     (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
     voir(vision, plateau)
-    return points
+    if guard_range:
+        return True
+    return False
 
 
-def move(hr, points):
-    points += 1
+def move(hr):
     hr.move()
     (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
     voir(vision, plateau)
-    if guard_range :
-        points += 5
-    return points
+    if guard_range:
+        return True
+    return False
 
 
 def remaining_empty_cases(tableau):
@@ -185,14 +157,23 @@ def remaining_empty_cases(tableau):
     return False
 
 
+def remaining_target_cases(tableau):
+    for ligne in tableau:
+        for case in ligne:
+            if case == HC.TARGET:
+                return True
+    return False
+
+
 def count_qqn_pe_sur_cases(tableau):
     count_qqn_pe_sur = 0
     for ligne in tableau:
         for case in ligne:
             if isinstance(case, str) and (case == "qqn_pe" or case == "qqn_sur"):
                 count_qqn_pe_sur += 1
-            if isinstance(case, str) and (case == HC.GUARD_N or case == HC.GUARD_S or case == HC.GUARD_E or case == HC.GUARD_W or
-                                        case == HC.CIVIL_N or case == HC.CIVIL_S or case == HC.CIVIL_E or case == HC.CIVIL_W):
+            if isinstance(case, str) and (
+                    case == HC.GUARD_N or case == HC.GUARD_S or case == HC.GUARD_E or case == HC.GUARD_W or
+                    case == HC.CIVIL_N or case == HC.CIVIL_S or case == HC.CIVIL_E or case == HC.CIVIL_W):
                 count_qqn_pe_sur -= 1
     return count_qqn_pe_sur
 
@@ -200,7 +181,6 @@ def count_qqn_pe_sur_cases(tableau):
 def parcours_plateau(hr):
     (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
 
-    points = 0
     voir(vision, plateau)
     entendre(position, hear, plateau)
     print_plateau(plateau)
@@ -216,7 +196,7 @@ def parcours_plateau(hr):
     case_droite = None
     case_gauche = None
     if orientation == HC.N:  # Hitman regarde au Nord
-        if 0 <= y_pos <= N and 0 <= x_pos + 1<= M:
+        if 0 <= y_pos <= N and 0 <= x_pos + 1 <= M:
             case_devant = vision[0][1]
         if 0 <= y_pos + 1 <= N and 0 <= x_pos <= M:
             case_droite = plateau[x_pos][y_pos + 1]
@@ -227,7 +207,7 @@ def parcours_plateau(hr):
             case_devant = vision[0][1]
         if 0 <= y_pos - 1 <= N and 0 <= x_pos <= M:
             case_droite = plateau[x_pos][y_pos - 1]
-        if 0 <= y_pos + 1<= N and 0 <= x_pos <= M:
+        if 0 <= y_pos + 1 <= N and 0 <= x_pos <= M:
             case_gauche = plateau[x_pos][y_pos + 1]
     elif orientation == HC.E:  # Hitman regarde à l'Est
         if 0 <= y_pos + 1 <= N and 0 <= x_pos <= M:
@@ -237,7 +217,7 @@ def parcours_plateau(hr):
         if 0 <= y_pos <= N and 0 <= x_pos + 1 <= M:
             case_gauche = plateau[x_pos + 1][y_pos]
     else:  # Hitman regarde à l'Ouest
-        if 0 <= y_pos - 1<= N and 0 <= x_pos <= M:
+        if 0 <= y_pos - 1 <= N and 0 <= x_pos <= M:
             case_devant = vision[0][1]
         if 0 <= y_pos <= N and 0 <= x_pos + 1 <= M:
             case_droite = plateau[x_pos + 1][y_pos]
@@ -250,40 +230,44 @@ def parcours_plateau(hr):
 
     choix_tab = []
 
-    if (case_devant != None) and (case_devant == HC.EMPTY or case_devant == "qqn_pe" or case_devant == "non_etudie" or case_devant == "personne"):  # Si la case devant est vide avancer
+    if (case_devant != None) and (
+            case_devant == HC.EMPTY or case_devant == "qqn_pe" or case_devant == "non_etudie" or case_devant == "personne"):  # Si la case devant est vide avancer
         choix_tab.append(0)
 
-    if (case_droite != None) and (case_droite == HC.EMPTY or case_droite == "qqn_pe" or case_droite == "non_etudie" or case_droite == "personne"):
+    if (case_droite != None) and (
+            case_droite == HC.EMPTY or case_droite == "qqn_pe" or case_droite == "non_etudie" or case_droite == "personne"):
         choix_tab.append(1)
 
-    if (case_gauche != None) and (case_gauche == HC.EMPTY or case_gauche == "qqn_pe" or case_gauche == "non_etudie" or case_gauche == "personne"):
+    if (case_gauche != None) and (
+            case_gauche == HC.EMPTY or case_gauche == "qqn_pe" or case_gauche == "non_etudie" or case_gauche == "personne"):
         choix_tab.append(2)
 
     if choix_tab != []:
         choix = random.choice(choix_tab)
         print(choix_tab)
         if choix == 0:
-            move(hr, points)
+            garde = move(hr)
+            points = 1
             print("Hitman avance")
+            return points, garde
         elif choix == 1:
-            turn_clockwise(hr, points)
+            garde = turn_clockwise(hr)
+            points = 2
             print("Hitman tourne à droite et avance")
+            return points, garde
         else:
-            turn_anti_clockwise(hr, points)
+            garde = turn_anti_clockwise(hr)
+            points = 2
             print("Hitman tourne à gauche et avance")
-        print("---------------------------------------------------------------------------------------")
-        return points
-    else :
+            return points, garde
+    else:
+        # Implémenter fonction demi-tour pour éviter que hitman soit bloqué.
         print("Hitman est bloqué")
         print("---------------------------------------------------------------------------------------")
         breakpoint()
-        return points
-
 
 
 # --------------------------------------------------------------------------------------------------------------------------------#
-
-
 
 
 hr = HitmanReferee()
@@ -291,107 +275,13 @@ hr = HitmanReferee()
 (N, M, plateau, guard_count, civil_count) = premier_appel(hr)
 
 parcours_idx = 0
-while remaining_empty_cases(plateau) or count_qqn_pe_sur_cases(plateau) != guard_count+civil_count:
-    #res = parcours_plateau(hr)
-    print(parcours_plateau(hr))
-    parcours_idx += 1
-
-print(parcours_idx)
-
-"""(vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
-
-print(f"personne entendu : {hear}")
-print(f"position : {position}")
-print(vision[0][1])
-print(orientation)
-entendre(position, hear, plateau)
-voir(vision, plateau)
-anaylse(hr, position, orientation, plateau)
-print_plateau(plateau)
-
-hr.turn_clockwise()
-(vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
-print(f"personne entendu : {hear}")
-print(f"position : {position}")
-print(vision)
-entendre(position, hear, plateau)
-voir(vision, plateau)
-anaylse(hr, position, orientation, plateau)
-print_plateau(plateau)
-"""
-
-"""
-hr.turn_clockwise()
-(vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
-print(hear)
-entendre(position, hear, plateau)
-voir(vision, plateau)
-print_plateau(plateau)
-
-hr.move()
-(vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
-print(hear)
-entendre(position, hear, plateau)
-voir(vision, plateau)
-print_plateau(plateau)
-
-hr.turn_anti_clockwise()
-(vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
-print(hear)
-entendre(position, hear, plateau)
-voir(vision, plateau)
-print_plateau(plateau)
-
-hr.move()
-(vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
-print(hear)
-entendre(position, hear, plateau)
-voir(vision, plateau)
-print_plateau(plateau)
-
-hr.turn_clockwise()
-(vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
-print(hear)
-entendre(position, hear, plateau)
-voir(vision, plateau)
-print_plateau(plateau)
-
-hr.move()
-(vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
-print(hear)
-entendre(position, hear, plateau)
-print(position)
-voir(vision, plateau)
-print_plateau(plateau)
-
-hr.move()
-(vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
-print(hear)
-print(position)
-entendre(position, hear, plateau)
-voir(vision, plateau)
-print_plateau(plateau)
-
-hr.turn_anti_clockwise()
-(vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
-print(hear)
-print(position)
-entendre(position, hear, plateau)
-voir(vision, plateau)
-print_plateau(plateau)
-
-hr.move()
-(vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
-print(hear)
-print(position)
-entendre(position, hear, plateau)
-voir(vision, plateau)
-print_plateau(plateau)
-
-hr.move()
-(vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
-print(hear)
-print(position)
-entendre(position, hear, plateau)
-voir(vision, plateau)
-print_plateau(plateau)"""
+points = 0
+garde_vue = 0
+while (remaining_empty_cases(plateau) or count_qqn_pe_sur_cases(plateau) != guard_count + civil_count) or remaining_target_cases(plateau):
+    points_parcours, garde = parcours_plateau(hr)
+    points += points_parcours
+    if garde:
+        points += 5
+        garde_vue += 1
+        print(f"Hitmain a été vu : {garde_vue}")
+    print(points)

@@ -270,27 +270,21 @@ def dimacs(hr) :
     tab = []
     c = 0
     for el in unique_element_par_case_plateau(N,M) :
-        el.append(0)
         tab.append(el)
         c+=1
     for el in unique_cible(N,M) :
-        el.append(0)
         tab.append(el)
         c += 1
     for el in unique_costume(N, M) :
-        el.append(0)
         tab.append(el)
         c += 1
     for el in unique_corde(N,M) :
-        el.append(0)
         tab.append(el)
         c += 1
     for el in exactement_nb_civils(civils, N, M) :
-        el.append(0)
         tab.append(el)
         c += 1
     for el in exactement_nb_gardes(gardes, N, M) :
-        el.append(0)
         tab.append(el)
         c += 1
     return tab, c
@@ -301,6 +295,11 @@ tab, c = dimacs(hr)
 print (tab)
 print (c)
 
-def write_dimacs_file(dimacs: str, filename: str):
-    with open(filename, "w", newline="") as cnf:
-        cnf.write(dimacs)
+def write_dimacs_file(filename: str, hr, N, M):
+    with open(filename, 'w') as file:
+        # Écriture de l'en-tête DIMACS
+        tab, c = dimacs(hr)
+        file.write('p cnf {} {}\n'.format(N*M,c))
+        # Écriture des clauses
+        for clause in tab:
+            file.write(' '.join(str(literal) for literal in clause) + ' 0\n')

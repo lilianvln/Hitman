@@ -1,8 +1,9 @@
 import random
-
-import numpy as np
+from colorama import Fore, Style
 from hitman import *
 
+
+# -----------------------------------------PLATEAU---------------------------------------------------------------------#
 
 def model_plateau(M, N):
     liste_plateau = [0] * M
@@ -28,6 +29,8 @@ def print_plateau(plateau):
     print("└" + "─" * (15 * colonnes + colonnes - 1) + "┘")  # Dernière ligne
 
 
+# -----------------------------------------ARBITRE---------------------------------------------------------------------#
+
 def call_arbitre(hr):
     status = hr.start_phase1()
     position = status["position"]
@@ -51,6 +54,8 @@ def premier_appel(hr):
     plateau[ligne - x_pos][y_pos] = "personne"
     return N, M, plateau, guard_count, civil_count
 
+
+# -----------------------------------------HITMAN----------------------------------------------------------------------#
 
 def voir(vision, plateau):  # remplit le tableau de ce qui est vu
     ligne = len(plateau) - 1
@@ -115,7 +120,7 @@ def entendre(position, entend, tab):
     return tab
 
 
-
+# -----------------------------------------MOUVEMENT HITMAN------------------------------------------------------------#
 def turn_clockwise(hr):
     hr.turn_clockwise()
     (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
@@ -149,6 +154,20 @@ def move(hr):
     return False
 
 
+def U_turn(hr):
+    hr.turn_clockwise()
+    (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
+    voir(vision, plateau)
+    hr.turn_clockwise()
+    (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
+    voir(vision, plateau)
+    if guard_range:
+        return True
+    return False
+
+
+# -----------------------------------------ANALYSE PLATEAU-------------------------------------------------------------#
+
 def remaining_empty_cases(tableau):
     for ligne in tableau:
         for case in ligne:
@@ -178,8 +197,17 @@ def count_qqn_pe_sur_cases(tableau):
     return count_qqn_pe_sur
 
 
-def parcours_plateau(hr):
+# -----------------------------------------PARCOURS PLATEAU-----------------------------------------------------------#
+
+def parcours_plateau(hr, plateau):
     (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
+
+    M = len(plateau) - 1
+    N = len(plateau[0]) - 1
+
+    y_pos, x_pos = position
+    tmp = plateau[M - x_pos][y_pos]
+    plateau[M - x_pos][y_pos] = f"{Fore.RED}    HITMAN    {Style.RESET_ALL}"
 
     voir(vision, plateau)
     entendre(position, hear, plateau)
@@ -188,48 +216,57 @@ def parcours_plateau(hr):
     print(f"orientation de Hitman : {orientation}")
     print(f"vision de Hitman : {vision}")
 
-    y_pos, x_pos = position
-    M = len(plateau) - 1
-    N = len(plateau[0]) - 1
+    plateau[M - x_pos][y_pos] = tmp
 
     case_devant = None
     case_droite = None
     case_gauche = None
+
     if orientation == HC.N:  # Hitman regarde au Nord
+        print(f"ypos = {y_pos}, xpos = {x_pos}")
         if 0 <= y_pos <= N and 0 <= x_pos + 1 <= M:
             case_devant = vision[0][1]
+
         if 0 <= y_pos + 1 <= N and 0 <= x_pos <= M:
-            case_droite = plateau[x_pos][y_pos + 1]
+            case_droite = plateau[M - x_pos][y_pos + 1]
+
         if 0 <= y_pos - 1 <= N and 0 <= x_pos <= M:
-            case_gauche = plateau[x_pos][y_pos - 1]
+            case_gauche = plateau[M - x_pos][y_pos - 1]
     elif orientation == HC.S:  # Hitman regarde au Sud
         if 0 <= y_pos <= N and 0 <= x_pos - 1 <= M:
             case_devant = vision[0][1]
+
         if 0 <= y_pos - 1 <= N and 0 <= x_pos <= M:
-            case_droite = plateau[x_pos][y_pos - 1]
-        if 0 <= y_pos + 1 <= N and 0 <= x_pos <= M:
-            case_gauche = plateau[x_pos][y_pos + 1]
+            case_droite = plateau[M - x_pos][y_pos - 1]
+
+        if 0 <= y_pos + 1 <= N and 0 <= M - x_pos <= M:
+            case_gauche = plateau[M - x_pos][y_pos + 1]
     elif orientation == HC.E:  # Hitman regarde à l'Est
         if 0 <= y_pos + 1 <= N and 0 <= x_pos <= M:
             case_devant = vision[0][1]
-        if 0 <= y_pos <= N and 0 <= x_pos - 1 <= M:
-            case_droite = plateau[x_pos - 1][y_pos]
-        if 0 <= y_pos <= N and 0 <= x_pos + 1 <= M:
-            case_gauche = plateau[x_pos + 1][y_pos]
+
+        print(f"ypos {y_pos}, xpos{x_pos}")
+        if 0 <= y_pos <= N and 0 <= M - x_pos + 1 <= M:
+            case_droite = plateau[(M - x_pos) + 1][y_pos]
+
+        if 0 <= y_pos <= N and 0 <= M - x_pos - 1 <= M:
+            case_gauche = plateau[(M - x_pos) - 1][y_pos]
     else:  # Hitman regarde à l'Ouest
         if 0 <= y_pos - 1 <= N and 0 <= x_pos <= M:
             case_devant = vision[0][1]
-        if 0 <= y_pos <= N and 0 <= x_pos + 1 <= M:
-            case_droite = plateau[x_pos + 1][y_pos]
-        if 0 <= y_pos <= N and 0 <= x_pos - 1 <= M:
-            case_gauche = plateau[x_pos - 1][y_pos]
+
+        print(f"ypos {y_pos}, xpos {x_pos}")
+        if 0 <= y_pos <= N and 0 <= M - x_pos - 1 <= M:
+            case_droite = plateau[(M - x_pos) - 1][y_pos]
+
+        if 0 <= y_pos <= N and 0 <= M - x_pos + 1 <= M:
+            case_gauche = plateau[(M - x_pos) + 1][y_pos]
 
     print(f"case devant : {case_devant}")
     print(f"case droite : {case_droite}")
     print(f"case gauche : {case_gauche}")
 
     choix_tab = []
-
     if (case_devant != None) and (
             case_devant == HC.EMPTY or case_devant == "qqn_pe" or case_devant == "non_etudie" or case_devant == "personne"):  # Si la case devant est vide avancer
         choix_tab.append(0)
@@ -246,29 +283,33 @@ def parcours_plateau(hr):
         choix = random.choice(choix_tab)
         print(choix_tab)
         if choix == 0:
+            print("Hitman avance")
             garde = move(hr)
             points = 1
-            print("Hitman avance")
+            print("---------------------------------------------------------------------------------------")
             return points, garde
         elif choix == 1:
+            print("Hitman tourne à droite et avance")
             garde = turn_clockwise(hr)
             points = 2
-            print("Hitman tourne à droite et avance")
+            print("---------------------------------------------------------------------------------------")
             return points, garde
         else:
+            print("Hitman tourne à gauche et avance")
             garde = turn_anti_clockwise(hr)
             points = 2
-            print("Hitman tourne à gauche et avance")
+            print("---------------------------------------------------------------------------------------")
             return points, garde
     else:
         # Implémenter fonction demi-tour pour éviter que hitman soit bloqué.
-        print("Hitman est bloqué")
+        print("Hitman fait demi-tour")
+        garde = U_turn(hr)
+        points = 2
         print("---------------------------------------------------------------------------------------")
-        breakpoint()
+        return points, garde
 
 
-# --------------------------------------------------------------------------------------------------------------------------------#
-
+# -----------------------------------------MAIN------------------------------------------------------------------------#
 
 hr = HitmanReferee()
 
@@ -277,11 +318,12 @@ hr = HitmanReferee()
 parcours_idx = 0
 points = 0
 garde_vue = 0
-while (remaining_empty_cases(plateau) or count_qqn_pe_sur_cases(plateau) != guard_count + civil_count) or remaining_target_cases(plateau):
-    points_parcours, garde = parcours_plateau(hr)
+while (remaining_empty_cases(plateau) or count_qqn_pe_sur_cases(
+        plateau) != guard_count + civil_count) or remaining_target_cases(plateau):
+    points_parcours, garde = parcours_plateau(hr, plateau)
     points += points_parcours
     if garde:
         points += 5
         garde_vue += 1
-        print(f"Hitmain a été vu : {garde_vue}")
+        print(f"Hitmain a été vu : {garde_vue} fois")
     print(points)

@@ -1,0 +1,21 @@
+c FILE: Exercice_2.cnf
+c
+c SOURCE: Lilian Valin
+c
+c DESCRIPTION: Exercice 2 - CNF de la licorne
+c
+c NOTATION:
+c 1 : My -> la licorne est mythique
+c 2 : Co -> possède une corne
+c 3 : Mo -> est mortelle
+c 4 : Mag -> est magique
+c 5 : Mam -> est un mamifère
+c
+p cnf 5 7
+-1 -3 0
+1 5 0
+1 3 0
+-5 2 0
+3 2 0
+-2 4 0
+1 0

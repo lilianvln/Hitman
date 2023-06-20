@@ -146,28 +146,35 @@ def entendre(position, entend, tab):
 """
 
 
-def turn_clockwise(hr):
+def turn_clockwise(hr, points):
     hr.turn_clockwise()
+    points += 1
     (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
     voir(vision, plateau)
     hr.move()
     (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
     voir(vision, plateau)
+    return points
 
-
-def turn_anti_clockwise(hr):
+def turn_anti_clockwise(hr, points):
     hr.turn_anti_clockwise()
+    points += 1
     (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
     voir(vision, plateau)
     hr.move()
     (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
     voir(vision, plateau)
+    return points
 
 
-def move(hr):
+def move(hr, points):
+    points += 1
     hr.move()
     (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
     voir(vision, plateau)
+    if guard_range :
+        points += 5
+    return points
 
 
 def remaining_empty_cases(tableau):
@@ -193,6 +200,7 @@ def count_qqn_pe_sur_cases(tableau):
 def parcours_plateau(hr):
     (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
 
+    points = 0
     voir(vision, plateau)
     entendre(position, hear, plateau)
     print_plateau(plateau)
@@ -255,21 +263,21 @@ def parcours_plateau(hr):
         choix = random.choice(choix_tab)
         print(choix_tab)
         if choix == 0:
-            move(hr)
+            move(hr, points)
             print("Hitman avance")
         elif choix == 1:
-            turn_clockwise(hr)
+            turn_clockwise(hr, points)
             print("Hitman tourne à droite et avance")
         else:
-            turn_anti_clockwise(hr)
+            turn_anti_clockwise(hr, points)
             print("Hitman tourne à gauche et avance")
         print("---------------------------------------------------------------------------------------")
-        return 1
+        return points
     else :
         print("Hitman est bloqué")
         print("---------------------------------------------------------------------------------------")
         breakpoint()
-        return 0
+        return points
 
 
 
@@ -284,8 +292,8 @@ hr = HitmanReferee()
 
 parcours_idx = 0
 while remaining_empty_cases(plateau) or count_qqn_pe_sur_cases(plateau) != guard_count+civil_count:
-    res = parcours_plateau(hr)
-    print(res)
+    #res = parcours_plateau(hr)
+    print(parcours_plateau(hr))
     parcours_idx += 1
 
 print(parcours_idx)

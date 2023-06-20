@@ -1,6 +1,6 @@
 from hitman import HC, HitmanReferee, complete_map_example
 from pprint import pprint
-import numpy as np
+#import numpy as np
 
 
 def model_plateau(M, N):

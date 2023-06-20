@@ -168,7 +168,7 @@ def U_turn(hr):
 
 # -----------------------------------------ANALYSE PLATEAU-------------------------------------------------------------#
 
-def remaining_empty_cases(tableau):
+def cases_non_etudie(tableau):
     for ligne in tableau:
         for case in ligne:
             if case == "non_etudie" or case == "qqn_pe":
@@ -176,7 +176,7 @@ def remaining_empty_cases(tableau):
     return False
 
 
-def remaining_target_cases(tableau):
+def cases_target(tableau):
     for ligne in tableau:
         for case in ligne:
             if case == HC.TARGET:
@@ -212,9 +212,9 @@ def parcours_plateau(hr, plateau):
     voir(vision, plateau)
     entendre(position, hear, plateau)
     print_plateau(plateau)
-    print(f"position de Hitman : {position}")
-    print(f"orientation de Hitman : {orientation}")
-    print(f"vision de Hitman : {vision}")
+    print(f"Position de Hitman : {position}")
+    print(f"Orientation de Hitman : {orientation}")
+    print(f"Vision de Hitman : {vision}")
 
     plateau[M - x_pos][y_pos] = tmp
 
@@ -245,7 +245,6 @@ def parcours_plateau(hr, plateau):
         if 0 <= y_pos + 1 <= N and 0 <= x_pos <= M:
             case_devant = vision[0][1]
 
-        print(f"ypos {y_pos}, xpos{x_pos}")
         if 0 <= y_pos <= N and 0 <= M - x_pos + 1 <= M:
             case_droite = plateau[(M - x_pos) + 1][y_pos]
 
@@ -255,16 +254,11 @@ def parcours_plateau(hr, plateau):
         if 0 <= y_pos - 1 <= N and 0 <= x_pos <= M:
             case_devant = vision[0][1]
 
-        print(f"ypos {y_pos}, xpos {x_pos}")
         if 0 <= y_pos <= N and 0 <= M - x_pos - 1 <= M:
             case_droite = plateau[(M - x_pos) - 1][y_pos]
 
         if 0 <= y_pos <= N and 0 <= M - x_pos + 1 <= M:
             case_gauche = plateau[(M - x_pos) + 1][y_pos]
-
-    print(f"case devant : {case_devant}")
-    print(f"case droite : {case_droite}")
-    print(f"case gauche : {case_gauche}")
 
     choix_tab = []
     if (case_devant != None) and (
@@ -281,32 +275,31 @@ def parcours_plateau(hr, plateau):
 
     if choix_tab != []:
         choix = random.choice(choix_tab)
-        print(choix_tab)
         if choix == 0:
             print("Hitman avance")
-            garde = move(hr)
+            garde_range = move(hr)
             points = 1
             print("---------------------------------------------------------------------------------------")
-            return points, garde
+            return points, garde_range
         elif choix == 1:
             print("Hitman tourne à droite et avance")
-            garde = turn_clockwise(hr)
+            garde_range = turn_clockwise(hr)
             points = 2
             print("---------------------------------------------------------------------------------------")
-            return points, garde
+            return points, garde_range
         else:
             print("Hitman tourne à gauche et avance")
-            garde = turn_anti_clockwise(hr)
+            garde_range = turn_anti_clockwise(hr)
             points = 2
             print("---------------------------------------------------------------------------------------")
-            return points, garde
+            return points, garde_range
     else:
         # Implémenter fonction demi-tour pour éviter que hitman soit bloqué.
         print("Hitman fait demi-tour")
-        garde = U_turn(hr)
+        garde_range = U_turn(hr)
         points = 2
         print("---------------------------------------------------------------------------------------")
-        return points, garde
+        return points, garde_range
 
 
 # -----------------------------------------MAIN------------------------------------------------------------------------#
@@ -315,15 +308,20 @@ hr = HitmanReferee()
 
 (N, M, plateau, guard_count, civil_count) = premier_appel(hr)
 
-parcours_idx = 0
-points = 0
-garde_vue = 0
-while (remaining_empty_cases(plateau) or count_qqn_pe_sur_cases(
-        plateau) != guard_count + civil_count) or remaining_target_cases(plateau):
-    points_parcours, garde = parcours_plateau(hr, plateau)
-    points += points_parcours
-    if garde:
-        points += 5
-        garde_vue += 1
-        print(f"Hitmain a été vu : {garde_vue} fois")
-    print(points)
+
+points_parcours = 0
+point_garde_range = 0
+while cases_non_etudie(plateau) or not cases_target(plateau):  # Teste s'il reste des cases vides et si on à trouvé la cible.
+    points_action, garde_range = parcours_plateau(hr, plateau)
+    points_parcours += points_action
+    print()
+    if garde_range:
+        points_action += 5
+        point_garde_range += 1
+        print(f"Hitman a été vu !!")
+    print(f"Point d'action : {points_parcours}")
+
+print("--------------------------------------------------PLATEAU FINAL-------------------------------------------------")
+print_plateau(plateau)
+print(f"Point d'action : {points_parcours}")
+print(f"Nombre de fois ou Hitman a été vue : {point_garde_range}")

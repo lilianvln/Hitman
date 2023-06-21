@@ -5,101 +5,101 @@ from itertools import *
 
 #pour chaque case on a 4(garde)+4(civil)+1(mur)+1(corde de piano)+1(costume)+1(vide)+1(cible) = 13 variables
 # donc N*M*13 variables au total
-# 0 -> case (0,0) vide
-# 1, 2, 3, 4 -> garde dans la case (0;0)
-# 5, 6, 7, 8 -> garde dans la case (0;0)
+# 1 -> case (0,0) vide
+# 2, 3, 4, 5 -> garde dans la case (0;0)
+# 6, 7, 8, 9 -> garde dans la case (0;0)
 #(N, E, S, W)
-# 9 -> mur dans la case (0;0)
-# 10 -> corde de piano dans la case (0;0)
-# 11 -> costume dans la case (0;0)
-# 12 -> cible dans la case (0;0)
+# 10 -> mur dans la case (0;0)
+# 11 -> corde de piano dans la case (0;0)
+# 12 -> costume dans la case (0;0)
+# 13 -> cible dans la case (0;0)
 
 def var_vide(N, M) :
     res = []
-    for i in range (N) :
-        for j in range (M) :
+    for i in range (1, N+1) :
+        for j in range (1, M+1) :
             res.append(13*i + 13*j)
     return res
 
 def var_civilN(N, M) :
     res = []
-    for i in range (N) :
-        for j in range (M) :
+    for i in range (1, N+1) :
+        for j in range (1, M+1) :
             res.append(13*i + 13*j + 1)
     return res
 
 def var_civilE(N, M) :
     res = []
-    for i in range (N) :
-        for j in range (M) :
+    for i in range (1, N+1) :
+        for j in range (1, M+1) :
             res.append(13*i + 13*j + 2)
     return res
 
 def var_civilS(N, M) :
     res = []
-    for i in range (N) :
-        for j in range (M) :
+    for i in range (1, N+1) :
+        for j in range (1, M+1) :
             res.append(13*i + 13*j + 3)
     return res
 
 def var_civilW(N, M) :
     res = []
-    for i in range (N) :
-        for j in range (M) :
+    for i in range (1, N+1) :
+        for j in range (1, M+1) :
             res.append(12*i + 12*j + 4)
     return res
 
 def var_guardN(N, M) :
     res = []
-    for i in range (N) :
-        for j in range (M) :
+    for i in range (1, N+1) :
+        for j in range (1, M+1) :
             res.append(12*i + 12*j + 5)
     return res
 
 def var_guardE(N, M) :
     res = []
-    for i in range (N) :
-        for j in range (M) :
+    for i in range (1, N+1) :
+        for j in range (1, M+1) :
             res.append(12*i + 12*j + 6)
     return res
 
 def var_guardS(N, M) :
     res = []
-    for i in range (N) :
-        for j in range (M) :
+    for i in range (1, N+1) :
+        for j in range (1, M+1) :
             res.append(12*i + 12*j + 7)
     return res
 
 def var_guardW(N, M) :
     res = []
-    for i in range (N) :
-        for j in range (M) :
+    for i in range (1, N+1) :
+        for j in range (1, M+1) :
             res.append(12*i + 12*j + 8)
     return res
 
 def var_mur(N, M) :
     res = []
-    for i in range (N) :
-        for j in range (M) :
+    for i in range (1, N+1) :
+        for j in range (1, M+1) :
             res.append(12*i + 12*j + 19)
     return res
 def var_corde(N, M) :
     res = []
-    for i in range (N) :
-        for j in range (M) :
+    for i in range (1, N+1) :
+        for j in range (1, M+1) :
             res.append(12*i + 12*j + 10)
     return res
 def var_costume(N, M) :
     res = []
-    for i in range (N) :
-        for j in range (M) :
+    for i in range (1, N+1) :
+        for j in range (1, M+1) :
             res.append(12*i + 12*j + 11)
     return res
 
 def var_cible(N, M) :
     res = []
-    for i in range (N) :
-        for j in range (M) :
+    for i in range (1, N+1) :
+        for j in range (1, M+1) :
             res.append(12*i + 12*j + 12)
     return res
 def varToCell(M, N, var):
@@ -156,6 +156,7 @@ def at_least_one(var):
 
 def position_to_num_case(x, y, N) :
     return N*y+x
+
 def unique_element_par_case_i(x, y, N) :
     #retourne une liste de clauses il y a un unique element dans cette case
     liste = []

@@ -16,91 +16,91 @@ from itertools import *
 
 def var_vide(N, M) :
     res = []
-    for i in range (1, N+1) :
-        for j in range (1, M+1) :
-            res.append(13*i + 13*j)
+    for i in range (N) :
+        for j in range (M) :
+            res.append(13*i + 13*j*N + 1)
     return res
 
 def var_civilN(N, M) :
     res = []
-    for i in range (1, N+1) :
-        for j in range (1, M+1) :
-            res.append(13*i + 13*j + 1)
+    for i in range (N) :
+        for j in range (M) :
+            res.append(13*i + 13*j*N + 2)
     return res
 
 def var_civilE(N, M) :
     res = []
-    for i in range (1, N+1) :
-        for j in range (1, M+1) :
-            res.append(13*i + 13*j + 2)
+    for i in range (N) :
+        for j in range (M) :
+            res.append(13*i + 13*j*N + 3)
     return res
 
 def var_civilS(N, M) :
     res = []
-    for i in range (1, N+1) :
-        for j in range (1, M+1) :
-            res.append(13*i + 13*j + 3)
+    for i in range (N) :
+        for j in range (M) :
+            res.append(13*i + 13*j*N + 4)
     return res
 
 def var_civilW(N, M) :
     res = []
-    for i in range (1, N+1) :
-        for j in range (1, M+1) :
-            res.append(12*i + 12*j + 4)
+    for i in range (N) :
+        for j in range (M) :
+            res.append(13*i + 13*j*N + 5)
     return res
 
 def var_guardN(N, M) :
     res = []
-    for i in range (1, N+1) :
-        for j in range (1, M+1) :
-            res.append(12*i + 12*j + 5)
+    for i in range (N) :
+        for j in range (M) :
+            res.append(13*i + 13*j*N + 6)
     return res
 
 def var_guardE(N, M) :
     res = []
-    for i in range (1, N+1) :
-        for j in range (1, M+1) :
-            res.append(12*i + 12*j + 6)
+    for i in range (N) :
+        for j in range (M) :
+            res.append(13*i + 13*j*N + 7)
     return res
 
 def var_guardS(N, M) :
     res = []
-    for i in range (1, N+1) :
-        for j in range (1, M+1) :
-            res.append(12*i + 12*j + 7)
+    for i in range (N) :
+        for j in range (M) :
+            res.append(13*i + 13*j*N + 8)
     return res
 
 def var_guardW(N, M) :
     res = []
-    for i in range (1, N+1) :
-        for j in range (1, M+1) :
-            res.append(12*i + 12*j + 8)
+    for i in range (N) :
+        for j in range (M) :
+            res.append(13*i + 13*j*N + 9)
     return res
 
 def var_mur(N, M) :
     res = []
-    for i in range (1, N+1) :
-        for j in range (1, M+1) :
-            res.append(12*i + 12*j + 19)
+    for i in range (N) :
+        for j in range (M) :
+            res.append(13*i + 13*j*N + 10)
     return res
 def var_corde(N, M) :
     res = []
-    for i in range (1, N+1) :
-        for j in range (1, M+1) :
-            res.append(12*i + 12*j + 10)
+    for i in range (N) :
+        for j in range (M) :
+            res.append(13*i + 13*j*N + 11)
     return res
 def var_costume(N, M) :
     res = []
-    for i in range (1, N+1) :
-        for j in range (1, M+1) :
-            res.append(12*i + 12*j + 11)
+    for i in range (N) :
+        for j in range (M) :
+            res.append(13*i + 13*j*N + 12)
     return res
 
 def var_cible(N, M) :
     res = []
-    for i in range (1, N+1) :
-        for j in range (1, M+1) :
-            res.append(12*i + 12*j + 12)
+    for i in range (N) :
+        for j in range (M) :
+            res.append(13*i + 13*j*N + 13)
     return res
 def varToCell(M, N, var):
     ligne = var // N
@@ -161,8 +161,8 @@ def unique_element_par_case_i(x, y, N) :
     #retourne une liste de clauses il y a un unique element dans cette case
     liste = []
     case = position_to_num_case(x, y, N)
-    numVar = case*12
-    for i in range (numVar, numVar+12) :
+    numVar = case*13+1
+    for i in range (numVar, numVar+13) :
         liste.append(i)
     res = unique(liste)
     return res
@@ -288,19 +288,25 @@ def dimacs(hr) :
     for el in exactement_nb_gardes(gardes, N, M) :
         tab.append(el)
         c += 1
-    return tab, c
+    return tab, c, N, M
 
 
-hr = HitmanReferee()
-tab, c = dimacs(hr)
-print (tab)
-print (c)
 
-def write_dimacs_file(filename: str, hr, N, M):
+
+def write_dimacs_file(filename: str, hr):
     with open(filename, 'w') as file:
-        # Écriture de l'en-tête DIMACS
-        tab, c = dimacs(hr)
-        file.write('p cnf {} {}\n'.format(N*M,c))
+        tab, c, N, M = dimacs(hr)
+        file.write('p cnf {} {}\n'.format(N*M*13, c))
         # Écriture des clauses
         for clause in tab:
             file.write(' '.join(str(literal) for literal in clause) + ' 0\n')
+
+
+hr = HitmanReferee()
+tab, c, N, M = dimacs(hr)
+print (tab)
+print (c)
+print (N)
+print (M)
+
+write_dimacs_file('hit.dimacs', hr)

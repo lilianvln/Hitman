@@ -127,14 +127,15 @@ def varGarde(M,N) :
 
 def varCivil(N, M) :
     res = []
-    for i in var_civilN(N, M):
-        res.append(i)
-    for i in var_civilE(N, M):
-        res.append(i)
-    for i in var_civilS(N, M):
-        res.append(i)
-    for i in var_civilW(N, M):
-        res.append(i)
+    est = var_civilE(N, M)
+    nord = var_civilN(N, M)
+    sud = var_civilS(N, M)
+    ouest = var_civilW(N, M)
+    for i in range(N * M):
+        res.append(nord[i])
+        res.append(est[i])
+        res.append(sud[i])
+        res.append(ouest[i])
     return res
 
 #status = hr.start_phase1()
@@ -210,15 +211,15 @@ def exactement_nb_vraies(liste, nb):
     num_variables = len(liste)
     res = []
 
-    # Au moins cinq variables doivent être vraies
+    # Au moins nb variables doivent être vraies
     res.append([liste[i] for i in range(num_variables)])
 
-    # Au plus cinq variables peuvent être vraies
+    # Au plus nb variables peuvent être vraies
     for i in range(num_variables):
         for j in range(i + 1, num_variables):
             res.append([-liste[i], -liste[j]])
 
-    # Exactement cinq variables doivent être vraies
+    # Exactement nb variables doivent être vraies
     combinations = itertools.combinations(liste, nb)
     for combination in combinations:
         clause = [-var for var in liste if var not in combination]
@@ -234,34 +235,37 @@ def exactement_nb_civils(nb, N, M) :
     liste = varCivil(N, M)
     return exactement_nb_vraies(liste, nb)
 
-def vision_to_dimacs(x, y, vue, N, M) :
+def vision_to_dimacs(filename, x, y, vue, N, M) :
     case = position_to_num_case(x, y, N)
     if vue == HC.EMPTY :
-        return var_vide(N,M)[case]
-    if vue == HC.CIVIL_E :
-        return var_civilE(N, M)[case]
-    if vue == HC.CIVIL_N :
-        return var_civilN(N, M)[case]
-    if vue == HC.CIVIL_S :
-        return var_civilN(N, M)[case]
-    if vue == HC.CIVIL_W:
-        return var_civilN(N, M)[case]
-    if vue == HC.GUARD_E :
-        return var_guardE(N, M)[case]
-    if vue == HC.GUARD_N :
-        return var_guardN(N, M)[case]
-    if vue == HC.GUARD_W :
-        return var_guardW(N, M)[case]
-    if vue == HC.GUARD_S :
-        return var_guardS(N, M)[case]
-    if vue == HC.PIANO_WIRE :
-        return var_corde(N, M)[case]
-    if vue == HC.SUIT :
-        return var_costume(N, M)[case]
-    if vue == HC.WALL :
-        return var_mur(N, M)[case]
-    if vue == HC.TARGET :
-        return var_cible(N, M)[case]
+        var = var_vide(N,M)[case]
+    elif vue == HC.CIVIL_E :
+        var = var_civilE(N, M)[case]
+    elif vue == HC.CIVIL_N :
+        var = var_civilN(N, M)[case]
+    elif vue == HC.CIVIL_S :
+        var = var_civilN(N, M)[case]
+    elif vue == HC.CIVIL_W:
+        var = var_civilN(N, M)[case]
+    elif vue == HC.GUARD_E :
+        var = var_guardE(N, M)[case]
+    elif vue == HC.GUARD_N :
+        var = var_guardN(N, M)[case]
+    elif vue == HC.GUARD_W :
+        var = var_guardW(N, M)[case]
+    elif vue == HC.GUARD_S :
+        var = var_guardS(N, M)[case]
+    elif vue == HC.PIANO_WIRE :
+        var = var_corde(N, M)[case]
+    elif vue == HC.SUIT :
+        var = var_costume(N, M)[case]
+    elif vue == HC.WALL :
+        var = var_mur(N, M)[case]
+    elif vue == HC.TARGET :
+        var = var_cible(N, M)[case]
+    with open(filename, 'a') as file:
+        file.write(str(var) + ' 0\n')
+
 
 def dimacs(hr) :
     status = hr.start_phase1()
@@ -283,10 +287,10 @@ def dimacs(hr) :
     for el in unique_corde(N,M) :
         tab.append(el)
         c += 1
-    #for el in exactement_nb_civils(civils, N, M) :
-        #tab.append(el)
-        #c += 1
     for el in exactement_nb_gardes(gardes, N, M) :
+        tab.append(el)
+        c += 1
+    for el in exactement_nb_civils(4, N, M) :
         tab.append(el)
         c += 1
     return tab, c, N, M

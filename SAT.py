@@ -282,12 +282,12 @@ def dimacs(hr) :
     for el in unique_corde(N,M) :
         tab.append(el)
         c += 1
-    for el in exactement_nb_civils(civils, N, M) :
-        tab.append(el)
-        c += 1
-    for el in exactement_nb_gardes(gardes, N, M) :
-        tab.append(el)
-        c += 1
+    #for el in exactement_nb_civils(civils, N, M) :
+        #tab.append(el)
+        #c += 1
+    #for el in exactement_nb_gardes(gardes, N, M) :
+        #tab.append(el)
+        #c += 1
     return tab, c, N, M
 
 
@@ -309,4 +309,4 @@ print (c)
 print (N)
 print (M)
 
-write_dimacs_file('hit.dimacs', hr)
+write_dimacs_file('hitman.cnf', hr)

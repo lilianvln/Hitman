@@ -221,7 +221,8 @@ def exactement_nb_vraies(liste, nb):
     # Exactement cinq variables doivent être vraies
     combinations = itertools.combinations(liste, nb)
     for combination in combinations:
-        res.append(list(combination))
+        clause = [-var for var in liste if var not in combination]
+        res.append(clause)
 
     return res
 
@@ -285,9 +286,9 @@ def dimacs(hr) :
     #for el in exactement_nb_civils(civils, N, M) :
         #tab.append(el)
         #c += 1
-    #for el in exactement_nb_gardes(gardes, N, M) :
-        #tab.append(el)
-        #c += 1
+    for el in exactement_nb_gardes(gardes, N, M) :
+        tab.append(el)
+        c += 1
     return tab, c, N, M
 
 

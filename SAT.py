@@ -129,7 +129,7 @@ def cellToVar(M, N, ligne, colonne):
     return var
 
 
-def varGarde(M, N):
+def varGarde(N, M):
     res = []
     est = var_guardE(N, M)
     nord = var_guardN(N, M)
@@ -185,12 +185,12 @@ def position_to_num_case(x, y, M):
 
 def unique_element_par_case_i(x, y, M):
     # retourne une liste de clauses il y a un unique element dans cette case
-    liste = []
     case = position_to_num_case(x, y, M)
-    numVar = case * 13 + 1
-    for i in range(numVar, numVar + 13):
-        liste.append(i)
-    res = unique(liste)
+    res = []
+    for var in range(13):
+        for autre_var in range(var + 1, 13):
+            clause = [-13 * case - var, -13 * case - autre_var]
+            res.append(clause)
     return res
 
 
@@ -317,7 +317,7 @@ def dimacs(hr):
     for el in exactement_nb_gardes(gardes, N, M):
         tab.append(el)
         c += 1
-    for el in exactement_nb_civils(4, N, M) :
+    for el in exactement_nb_civils(civils, N, M) :
         tab.append(el)
         c += 1
     return tab, c, N, M

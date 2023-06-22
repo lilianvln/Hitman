@@ -156,7 +156,7 @@ class HitmanReferee:
     def __init__(self, filename: str = "") -> None:
         self.__filename = filename
         if filename == "":
-            self.__world = world_example1
+            self.__world = world_example0
             self.__m = len(self.__world)
             self.__n = len(self.__world[0])
         else:

@@ -99,7 +99,7 @@ def entendre(position, entend, plateau):
         for i in range(x_min, x_max + 1):
             for j in range(y_min, y_max + 1):
                 if plateau[i][j] in ["non_etudie", "qqn_pe"]:
-                    plateau[i][j] = "personne"
+                    plateau[M - i][j] = "personne"
     else:  # on entend des gens
         nb_personne = 0
         non_connue = 0
@@ -275,8 +275,7 @@ def parcours_plateau(hr, plateau):
     choix_tab = []
 
     for i in range(len(vision)):
-        if vision[i][1] == HC.EMPTY or vision[i][1] == "personne" or vision[i][1] == "non_etudie" or vision[i][
-            1] == HC.CIVIL_N or vision[i][1] == HC.CIVIL_S or vision[i][1] == HC.CIVIL_E or vision[i][1] == HC.CIVIL_W:
+        if vision[i][1] == HC.EMPTY or vision[i][1] == "personne" or vision[i][1] == "non_etudie" or vision[i][1] == HC.CIVIL_N or vision[i][1] == HC.CIVIL_S or vision[i][1] == HC.CIVIL_E or vision[i][1] == HC.CIVIL_W:
             choix_tab.append(0)
 
     if (case_droite != None) and (
@@ -338,10 +337,24 @@ def main():
 
 
 # -----------------------------------------MAIN------------------------------------------------------------------------#
+point_parc = []
+point_garde = []
+for i in range(1):
+    plateau, points_parcours, point_garde_range = main()
+    point_parc.append(points_parcours)
+    point_garde.append(point_garde_range)
 
-plateau, points_parcours, point_garde_range = main()
+print(f"moyenne points parcours : {sum(point_parc)/len(point_parc)}")
+print(f"moyenne points garde : {sum(point_garde)/len(point_garde)}")
+
 
 print("--------------------------------------------------PLATEAU FINAL-------------------------------------------------")
 print_plateau(plateau)
 print(f"Point d'action : {points_parcours}")
 print(f"Nombre de fois ou Hitman a été vue : {point_garde_range}")
+
+
+#
+#Implémenter un tableau avec les cases que voient les gardes
+#Implémenter le solveur SAT
+#Améliorer entendre

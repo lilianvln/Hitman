@@ -235,6 +235,7 @@ def exactement_nb_civils(nb, N, M) :
     liste = varCivil(N, M)
     return exactement_nb_vraies(liste, nb)
 
+
 def vision_to_dimacs(filename, x, y, vue, N, M) :
     case = position_to_num_case(x, y, N)
     if vue == HC.EMPTY :

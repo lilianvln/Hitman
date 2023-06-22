@@ -64,7 +64,7 @@ def voir(vision, plateau):  # remplit le tableau de ce qui est vu
         x = ligne - i[0][1]
         y = i[0][0]
         plateau[x][y] = i[1]
-        vision_to_dimacs(x, y, i[1])
+        vision_to_dimacs('hitman.cnf',x, y, i[1], N, M)
     pass
 
 

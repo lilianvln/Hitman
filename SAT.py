@@ -1,7 +1,6 @@
 import itertools
 import os
 from hitman import *
-from itertools import *
 
 
 # pour chaque case on a 4(garde)+4(civil)+1(mur)+1(corde de piano)+1(costume)+1(vide)+1(cible) = 13 variables
@@ -19,7 +18,7 @@ def var_vide(N, M):
     res = []
     for i in range(N):
         for j in range(M):
-            res.append(13 * i + 13 * j * N + 1)
+            res.append(13 * i * M + 13 * j + 1)
     return res
 
 
@@ -27,7 +26,7 @@ def var_civilN(N, M):
     res = []
     for i in range(N):
         for j in range(M):
-            res.append(13 * i + 13 * j * N + 2)
+            res.append(13 * i * M + 13 * j + 2)
     return res
 
 
@@ -35,7 +34,7 @@ def var_civilE(N, M):
     res = []
     for i in range(N):
         for j in range(M):
-            res.append(13 * i + 13 * j * N + 3)
+            res.append(13 * i * M + 13 * j + 3)
     return res
 
 
@@ -43,7 +42,7 @@ def var_civilS(N, M):
     res = []
     for i in range(N):
         for j in range(M):
-            res.append(13 * i + 13 * j * N + 4)
+            res.append(13 * i * M + 13 * j + 4)
     return res
 
 
@@ -51,7 +50,7 @@ def var_civilW(N, M):
     res = []
     for i in range(N):
         for j in range(M):
-            res.append(13 * i + 13 * j * N + 5)
+            res.append(13 * i * M + 13 * j + 5)
     return res
 
 
@@ -59,7 +58,7 @@ def var_guardN(N, M):
     res = []
     for i in range(N):
         for j in range(M):
-            res.append(13 * i + 13 * j * N + 6)
+            res.append(13 * i * M + 13 * j + 6)
     return res
 
 
@@ -67,7 +66,7 @@ def var_guardE(N, M):
     res = []
     for i in range(N):
         for j in range(M):
-            res.append(13 * i + 13 * j * N + 7)
+            res.append(13 * i * M + 13 * j + 7)
     return res
 
 
@@ -75,7 +74,7 @@ def var_guardS(N, M):
     res = []
     for i in range(N):
         for j in range(M):
-            res.append(13 * i + 13 * j * N + 8)
+            res.append(13 * i * M + 13 * j + 8)
     return res
 
 
@@ -83,7 +82,7 @@ def var_guardW(N, M):
     res = []
     for i in range(N):
         for j in range(M):
-            res.append(13 * i + 13 * j * N + 9)
+            res.append(13 * i * M + 13 * j + 9)
     return res
 
 
@@ -91,7 +90,7 @@ def var_mur(N, M):
     res = []
     for i in range(N):
         for j in range(M):
-            res.append(13 * i + 13 * j * N + 10)
+            res.append(13 * i * M + 13 * j + 10)
     return res
 
 
@@ -99,7 +98,7 @@ def var_corde(N, M):
     res = []
     for i in range(N):
         for j in range(M):
-            res.append(13 * i + 13 * j * N + 11)
+            res.append(13 * i * M + 13 * j + 11)
     return res
 
 
@@ -107,7 +106,7 @@ def var_costume(N, M):
     res = []
     for i in range(N):
         for j in range(M):
-            res.append(13 * i + 13 * j * N + 12)
+            res.append(13 * i * M + 13 * j + 12)
     return res
 
 
@@ -115,7 +114,7 @@ def var_cible(N, M):
     res = []
     for i in range(N):
         for j in range(M):
-            res.append(13 * i + 13 * j * N + 13)
+            res.append(13 * i * M + 13 * j + 13)
     return res
 
 
@@ -180,14 +179,14 @@ def at_least_one(var):
     return var
 
 
-def position_to_num_case(x, y, N):
-    return N * y + x
+def position_to_num_case(x, y, M):
+    return M * y + x
 
 
-def unique_element_par_case_i(x, y, N):
+def unique_element_par_case_i(x, y, M):
     # retourne une liste de clauses il y a un unique element dans cette case
     liste = []
-    case = position_to_num_case(x, y, N)
+    case = position_to_num_case(x, y, M)
     numVar = case * 13 + 1
     for i in range(numVar, numVar + 13):
         liste.append(i)
@@ -200,7 +199,7 @@ def unique_element_par_case_plateau(N, M):
     res = []
     for i in range(N):
         for j in range(M):
-            for case in unique_element_par_case_i(i, j, N):
+            for case in unique_element_par_case_i(i, j, M):
                 res.append(case)
     return res
 
@@ -258,10 +257,12 @@ def exactement_nb_civils(nb, N, M):
 
 
 def vision_to_dimacs(filename, x, y, vue, N, M):
-    case = position_to_num_case(x, y, N)
-
+    case = position_to_num_case(x, y, M)
+    print(vue)
+    print(case)
     var = None
     if vue == HC.EMPTY:
+        print(var_vide(N, M))
         var = var_vide(N, M)[case]
     elif vue == HC.CIVIL_E:
         var = var_civilE(N, M)[case]
@@ -290,6 +291,7 @@ def vision_to_dimacs(filename, x, y, vue, N, M):
 
     if var is not None:
         with open(filename, 'a') as file:
+            print(var)
             file.write(str(var) + ' 0\n')
 
 def dimacs(hr):
@@ -315,7 +317,7 @@ def dimacs(hr):
     for el in exactement_nb_gardes(gardes, N, M):
         tab.append(el)
         c += 1
-    for el in exactement_nb_civils(civils, N, M):
+    for el in exactement_nb_civils(4, N, M) :
         tab.append(el)
         c += 1
     return tab, c, N, M
@@ -328,3 +330,14 @@ def write_dimacs_file(filename: str, hr):
         # Écriture des clauses
         for clause in tab:
             file.write(' '.join(str(literal) for literal in clause) + ' 0\n')
+
+
+hr = HitmanReferee()
+tab, c, N, M = dimacs(hr)
+#print (tab)
+print (c)
+print (N)
+print (M)
+print(var_vide(N,M))
+
+write_dimacs_file('hitman.cnf', hr)

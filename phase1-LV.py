@@ -1,6 +1,7 @@
 import random
 from colorama import Fore, Style
 from hitman import *
+import subprocess
 from SAT import *
 
 
@@ -32,6 +33,20 @@ def print_plateau(plateau):
 
 # -----------------------------------------ARBITRE---------------------------------------------------------------------#
 
+def premier_appel(hr):
+    status = hr.start_phase1()
+    y_pos, x_pos = status["position"]
+    guard_count = status["guard_count"]
+    civil_count = status["civil_count"]
+    N = status["n"]
+    M = status["m"]
+    plateau = model_plateau(M, N)
+    ligne = len(plateau) - 1
+    plateau[ligne - x_pos][y_pos] = "personne"
+    write_dimacs_file('hitman.cnf', hr)
+    return N, M, plateau, guard_count, civil_count
+
+
 def call_arbitre(hr):
     status = hr.start_phase1()
     position = status["position"]
@@ -43,28 +58,16 @@ def call_arbitre(hr):
     return vision, position, orientation, hear, penalties, guard_range
 
 
-def premier_appel(hr):
-    status = hr.start_phase1()
-    y_pos, x_pos = status["position"]
-    guard_count = status["guard_count"]
-    civil_count = status["civil_count"]
-    N = status["n"]
-    M = status["m"]
-    plateau = model_plateau(M, N)
-    ligne = len(plateau) - 1
-    plateau[ligne - x_pos][y_pos] = "personne"
-    return N, M, plateau, guard_count, civil_count
-
-
 # -----------------------------------------HITMAN----------------------------------------------------------------------#
 
 def voir(vision, plateau):  # remplit le tableau de ce qui est vu
-    ligne = len(plateau) - 1
+    M = len(plateau) - 1
+    N = len(plateau[0]) - 1
     for i in vision:
-        x = ligne - i[0][1]
+        x = M - i[0][1]
         y = i[0][0]
         plateau[x][y] = i[1]
-        vision_to_dimacs('hitman.cnf',x, y, i[1], N, M)
+        vision_to_dimacs('hitman.cnf', x, y, i[0][1], N, M)
     pass
 
 
@@ -99,7 +102,7 @@ def entendre(position, entend, plateau):
         for i in range(x_min, x_max + 1):
             for j in range(y_min, y_max + 1):
                 if plateau[i][j] in [HC.CIVIL_N, HC.CIVIL_E, HC.CIVIL_S, HC.CIVIL_W,
-                                 HC.GUARD_N, HC.GUARD_E, HC.GUARD_S, HC.GUARD_W]:
+                                     HC.GUARD_N, HC.GUARD_E, HC.GUARD_S, HC.GUARD_W]:
                     nb_personne += 1  # compte les personnes connues autour
                 if plateau[i][j] in ["non_etudie", "qqn_sur", "qqn_pe"]:
                     non_connue += 1  # compte les cases dont on ne connait pas le contenu et qui pourraient contenir qqn
@@ -192,13 +195,28 @@ def count_personne_decouverte(tableau):
     nb_qqn_sur = 0
     for ligne in tableau:
         for case in ligne:
-            if case == HC.GUARD_N or case == HC.GUARD_S or case == HC.GUARD_E or case == HC.GUARD_W or case == HC.CIVIL_N or case == HC.CIVIL_S or case == HC.CIVIL_E or case == HC.CIVIL_W :
+            if case == HC.GUARD_N or case == HC.GUARD_S or case == HC.GUARD_E or case == HC.GUARD_W or case == HC.CIVIL_N or case == HC.CIVIL_S or case == HC.CIVIL_E or case == HC.CIVIL_W:
                 nb_personne_decouverte += 1
             if case == "qqn_pe":
                 nb_qqn_pe += 1
             if case == "qqn_sur":
                 nb_qqn_sur += 1
     return nb_qqn_sur
+
+
+# -------------------------------------------GOPHERSAT-----------------------------------------------------------------#
+
+def solve_cnf(file_path):
+    command = ['gophersat.exe', file_path]  # Remplacez 'solver.exe' par le chemin du solveur SAT externe
+    result = subprocess.run(command, capture_output=True, text=True)
+
+    if result.returncode == 0:
+        output = result.stdout
+        print(output)
+    else:
+        error = result.stderr
+        print(error)
+
 
 
 # -----------------------------------------PARCOURS PLATEAU------------------------------------------------------------#
@@ -253,13 +271,16 @@ def parcours_plateau(hr, plateau):
     choix_tab = []
 
     for i in range(len(vision)):
-        if vision[i][1] == HC.EMPTY or vision[i][1] == "personne" or vision[i][1] == "non_etudie" or vision[i][1] == HC.CIVIL_N or vision[i][1] == HC.CIVIL_S or vision[i][1] == HC.CIVIL_E or vision[i][1] == HC.CIVIL_W:
-                choix_tab.append(0)
+        if vision[i][1] == HC.EMPTY or vision[i][1] == "personne" or vision[i][1] == "non_etudie" or vision[i][
+            1] == HC.CIVIL_N or vision[i][1] == HC.CIVIL_S or vision[i][1] == HC.CIVIL_E or vision[i][1] == HC.CIVIL_W:
+            choix_tab.append(0)
 
-    if (case_droite != None) and (case_droite == HC.EMPTY or case_droite == "qqn_pe" or case_droite == "non_etudie" or case_droite == "personne" or case_droite == HC.CIVIL_N or case_droite == HC.CIVIL_S or case_droite == HC.CIVIL_E or case_droite == HC.CIVIL_W):
+    if (case_droite != None) and (
+            case_droite == HC.EMPTY or case_droite == "qqn_pe" or case_droite == "non_etudie" or case_droite == "personne" or case_droite == HC.CIVIL_N or case_droite == HC.CIVIL_S or case_droite == HC.CIVIL_E or case_droite == HC.CIVIL_W):
         choix_tab.append(1)
 
-    if (case_gauche != None) and (case_gauche == HC.EMPTY or case_gauche == "qqn_pe" or case_gauche == "non_etudie" or case_gauche == "personne" or case_gauche == HC.CIVIL_N or case_gauche == HC.CIVIL_S or case_gauche == HC.CIVIL_E or case_gauche == HC.CIVIL_W):
+    if (case_gauche != None) and (
+            case_gauche == HC.EMPTY or case_gauche == "qqn_pe" or case_gauche == "non_etudie" or case_gauche == "personne" or case_gauche == HC.CIVIL_N or case_gauche == HC.CIVIL_S or case_gauche == HC.CIVIL_E or case_gauche == HC.CIVIL_W):
         choix_tab.append(2)
 
     if choix_tab:
@@ -297,7 +318,8 @@ def main():
 
     points_parcours = 0
     point_garde_range = 0
-    while (cases_non_etudie(plateau) or not cases_target(plateau)) and count_personne_decouverte(plateau) != guard_count + civil_count:  # Teste s'il reste des cases vides et si on a trouvé la cible.
+    while (cases_non_etudie(plateau) or not cases_target(plateau)) and count_personne_decouverte(
+            plateau) != guard_count + civil_count:  # Teste s'il reste des cases vides et si on a trouvé la cible.
         points_action, garde_range = parcours_plateau(hr, plateau)
         points_parcours += points_action
         if garde_range:
@@ -305,8 +327,11 @@ def main():
             point_garde_range += 1
             print(f"Hitman a été vu !!")
         print(f"Point d'action : {points_parcours}")
-        print("----------------------------------------------------------------------------------------------------------------")
+        print(
+            "----------------------------------------------------------------------------------------------------------------")
+    solve_cnf("hitman.cnf")
     return plateau, points_parcours, point_garde_range
+
 
 # -----------------------------------------MAIN------------------------------------------------------------------------#
 

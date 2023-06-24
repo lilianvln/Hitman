@@ -134,20 +134,6 @@ class Noeud:
         state["hitman"][1] = orientation
         return state
 
-    def case_ahead(self, x, y, orientation):
-        if orientation == (0 or 2):
-            x2 = x
-            if orientation == 0:
-                y2 = y + 1
-            else:
-                y2 = y - 1
-        elif orientation == (1 or 3):
-            y2 = y
-            if orientation == 1:
-                x2 = y + 1
-            else:
-                x2 = y - 1
-        return x2, y2
 
     def move(self, state, N, M):
         x, y = state["hitman"][0]
@@ -230,6 +216,20 @@ def goal(state):
         return True
     return False
 
+def case_ahead(x, y, orientation):
+    if orientation == (0 or 2):
+        x2 = x
+        if orientation == 0:
+            y2 = y + 1
+        else:
+            y2 = y - 1
+    elif orientation == (1 or 3):
+        y2 = y
+        if orientation == 1:
+            x2 = y + 1
+        else:
+            x2 = y - 1
+    return x2, y2
 """
 def heuristique(plateau, N, M, target):
     x, y = target
@@ -289,7 +289,16 @@ def initial_node(state, h, N, M) :
 
 def generate_children(node) :
     childrens = []
-    node.turn_clockwise(node.state)
+    state = node.state
+    g = node.cost_g
+    state_after_action = [node.turn_clockwise(state), node.turn_anti_clockwise(state), node.move(state), node.kill_civil(state),
+                          node.kill_guard(state), node.kill_target(state), node.get_suit(state), node.get_piano(state), node.wear_suit]
+    for i in range (9) :
+        noeud = Noeud(state_after_action[i], node) #, g+1, heurisitque(state_after_action[i]))
+        if noeud :
+            childrens.append(noeud)
+    return childrens
+
 def astar(node0):
     open = []
     closed = []
@@ -302,36 +311,31 @@ def astar(node0):
             if el.cost_f < current.cost_f :
                 current = el
 
-
-
         if goal(current.state): # l'étant courant est l'état final
             path = []
             while current is not None:
                 path.append(current.state)
                 current = current.parent
             path.reverse()
-            return path
+            return path # retourne une liste d'états correspondant au chemin le plus efficace
 
         closed.add(current.state)
 
-        # Générer les nœuds enfants en appliquant les opérations possibles
-        children = generate_children(current)
+        children = generate_children(current) # tous les mouvement possibles
 
         for child in children:
-            if child.state in closed_nodes:
-                continue
+            if not (child in closed) :
+                if not (child in open) :
+                    open.append(child)
+                    child.cost_g = current.cost_g + 1
+                    child.cost_h = heurisitque(child.state)
+                    child.cost_f = child.cost_g + child.cost_h
+                else :
+                    if child.cost_g > (current.cost_g +1) :
+                        child.cost_g = current.cost_g + 1
+                    if child.cost_h > heurisitque(child.state) :
+                        child.cost_h = heurisitque(child.state)
+                    child.cost_f = child.cost_g + child.cost_h
 
-            cost_g = current_node.cost_g + 1  # Coût du mouvement entre les nœuds est 1 pour cet exemple
-            cost_h = heuristic(child.state)  # Fonction heuristique à implémenter
-            cost_f = cost_g + cost_h
+    return None  # Aucun chemin trouvé
 
-            if child in open_nodes.queue:
-                # Vérifier si le nouvel état a un coût f plus bas
-                # Si c'est le cas, mettre à jour le nœud dans la file de priorité
-                # ...
-
-            else:
-                # Ajouter le nouvel état à la file de priorité
-                # ...
-
-    return None  # Aucun chemin trouv

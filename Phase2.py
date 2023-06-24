@@ -11,47 +11,77 @@ plateau, points_parcours, point_garde_range = main()
 
 def create_state0(plateau, N, M) :
     guards = []
+    guards_range = []
     civils = []
+    civil_range =[]
     target = []
     empty = []
     wall = []
     suit = []
     piano = []
-    for i in range (M-1) :
-        for j in range (N-1) :
+    M = M-1
+    N = N-1
+    for i in range (M+1) :
+        for j in range (N+1) :
             if plateau[i][j] == HC.CIVIL_N :
-                civils.append([(j, M-1-i), 0])
+                civils.append([(j, M-i), 0])
+                if M-i+1 <= M :
+                    civil_range.append((j, M-i+1))
             elif plateau[i][j] == HC.CIVIL_E :
-                civils.append([(j, M-1-i), 1])
+                civils.append([(j, M-i), 1])
+                if j+1 <= N :
+                    civil_range.append((j+1, M-i))
             elif plateau[i][j] == HC.CIVIL_S :
-                civils.append([(j, M-1-i), 2])
+                civils.append([(j, M-i), 2])
+                if (i+1) <= M :
+                    civil_range.append((j, M-i-1))
             elif plateau[i][j] == HC.CIVIL_W :
-                civils.append([(j, M-1-i), 3])
-            if plateau[i][j] == HC.GUARD_N :
-                guards.append([(j, M-1-i), 0])
+                civils.append([(j, M-i), 3])
+                if j-1 >= 0 :
+                    civil_range.append((j-1, M-i))
+            elif plateau[i][j] == HC.GUARD_N :
+                guards.append([(j, M-i), 0])
+                if M - i + 1 <= M:
+                    guards_range.append((j, M - i + 1))
+                if M - i + 2 <= M:
+                    guards_range.append((j, M - i + 2))
             elif plateau[i][j] == HC.GUARD_E :
-                guards.append([(j, M-1-i), 1])
+                guards.append([(j, M-i), 1])
+                if j+1 <= N :
+                    guards_range.append((j+1, M-i))
+                if j+2 <= N :
+                    guards_range.append((j+2, M-i))
             elif plateau[i][j] == HC.GUARD_S :
-                guards.append([(j, M-1-i), 2])
+                guards.append([(j, M-i), 2])
+                if (i+1) <= M :
+                    guards_range.append((j, M-i-1))
+                if (i+2) <= M:
+                    guards_range.append((j, M - i - 2))
             elif plateau[i][j] == HC.GUARD_W :
-                guards.append([(j, M-1-i), 3])
+                guards.append([(j, M-i), 3])
+                if j - 1 >= 0:
+                    guards_range.append((j - 1, M - i))
+                if j - 2 >= 0:
+                    guards_range.append((j - 2, M - i))
             elif plateau[i][j] == HC.TARGET :
-                target.append((j, M-1-i))
+                target.append((j, M-i))
             elif plateau[i][j] == HC.EMPTY :
-                empty.append((j, M-1-i))
+                empty.append((j, M-i))
             elif plateau[i][j] == HC.WALL :
-                wall.append((j, M-1-i))
+                wall.append((j, M-i))
             elif plateau[i][j] == HC.SUIT:
-                suit.append((j, M-1-i))
+                suit.append((j, M-i))
             elif plateau[i][j] == HC.PIANO_WIRE :
-                piano.append((j, M-1-i))
+                piano.append((j, M-i))
 
 
     state0 = {"hitman": [(0,0), 0],
               "empty" : empty,
               "target": target,
               "guards" : guards,
+              "guard_range" : guards_range, # liste des cases vues par un gardes
               "civils" : civils,
+              "civil_range" : civil_range, # liste des cases vues par un gardes
               "piano": piano,
               "suit": suit,
               "wall" : wall}
@@ -63,36 +93,6 @@ def create_state0(plateau, N, M) :
 
 
 
-
-
-
-
-
-
-"""
-class case :
-    def __init__(self, position, g=0, h=0):
-        self.position = position
-        self.g = g  # Coût du chemin depuis le nœud initial
-        self.h = h  # Estimation du coût restant pour atteindre le nœud final
-        self.f = g + h  # Coût total f = g + h
-        self.parent = None
-def etoile(target, heuristique) :
-
-    open = []
-    close = []
-    start = case((0,0), 0, heuristique[0][0])
-    open.append(start)
-    while open :
-        current = open[0]
-        for el in open :
-            if el.f < current.f :
-                current = el
-        if current.position == target :
-            break
-        open.remove(current)
-        close.add(current)
-"""
 
 
 def opposite_number(num):
@@ -122,7 +122,8 @@ class Noeud:
         orientation += 1
         if orientation == 4: orientation = 0
         state["hitman"][1] = orientation
-        return state
+        pena = 1
+        return state, pena
 
     def turn_anti_clockwise(self, state):
         orientation = state["hitman"][1]
@@ -132,7 +133,8 @@ class Noeud:
         orientation -= 1
         if orientation == -1: orientation = 0
         state["hitman"][1] = orientation
-        return state
+        pena = 1
+        return state, pena
 
 
     def move(self, state, N, M):
@@ -146,7 +148,10 @@ class Noeud:
             if i[0] == (x2, y2):
                 return None
         state["hitman"][0] = (x2, y2)
-        return state
+        pena = 1,
+        if (x,y) in state["guards_range"] :
+            pena += 5
+        return state, pena
 
     def kill_target(self, state):
         x, y = state["hitman"][0]
@@ -155,7 +160,12 @@ class Noeud:
         if not precond:
             return None
         state["target"] = None
-        return state
+        pena = 1
+        if (x,y) in state["guard_range"] :
+            pena += 100
+        if (x,y) in state["civil_range"] :
+            pena += 100
+        return state, pena
 
 
     def kill_guard(self, state):
@@ -172,6 +182,12 @@ class Noeud:
             return None
         state["gards"].remove([(x2, y2), o])
         state["empty"].append((x2, y2))
+        pena = 21 # 1 point d'action + 20 point pour personne neutralisée
+        if (x,y) in state["guard_range"] :
+            pena += 100
+        if (x,y) in state["civil_range"] :
+            pena += 100
+        return state, pena
 
     def kill_civil(self, state):
         x, y = state["hitman"][0]
@@ -187,6 +203,12 @@ class Noeud:
             return None
         state["civils"].remove([(x2, y2), o])
         state["empty"].append((x2, y2))
+        pena = 21  # 1 point d'action + 20 point pour personne neutralisée
+        if (x, y) in state["guard_range"]:
+            pena += 100
+        if (x, y) in state["civil_range"]:
+            pena += 100
+        return state, pena
 
     def get_suit(self, state):
         x, y = state["hitman"][0]
@@ -195,6 +217,8 @@ class Noeud:
             return None
         state["empty"].append((x, y))
         state["suit"] = None
+        pena = 1
+        return state, pena
 
     def get_piano(self, state):
         x, y = state["hitman"][0]
@@ -203,12 +227,21 @@ class Noeud:
             return None
         state["empty"].append((x, y))
         state["piano"] = "got"
+        pena = 1
+        return state, pena
 
     def wear_suit(self, state):
+        x, y = state["hitman"][0]
         precond = state["suit"] == "got"
         if not precond:
             return None
         state["suit"] == "wear"
+        pena = 1
+        if (x, y) in state["guard_range"]:
+            pena += 100
+        if (x, y) in state["civil_range"]:
+            pena += 100
+        return state, pena
 
 
 def goal(state):
@@ -230,20 +263,6 @@ def case_ahead(x, y, orientation):
         else:
             x2 = y - 1
     return x2, y2
-"""
-def heuristique(plateau, N, M, target):
-    x, y = target
-    h = []
-    ligne = 0
-    for i in range(M - 1, 0, -1):
-        for j in range(N - 1):
-            if plateau[i][j] == (HC.WALL or HC.GUARD_E or HC.GUARD_N or HC.GUARD_S or HC.GUARD_W):
-                h[ligne].append((i - y) + abs(j - x))
-            else:
-                h[ligne].append(None)
-        ligne += 1
-    return h
-"""
 
 def heurisitque(state) :
     return h_turn(state) + h_move(state)
@@ -294,12 +313,13 @@ def generate_children(node) :
     state_after_action = [node.turn_clockwise(state), node.turn_anti_clockwise(state), node.move(state), node.kill_civil(state),
                           node.kill_guard(state), node.kill_target(state), node.get_suit(state), node.get_piano(state), node.wear_suit]
     for i in range (9) :
-        noeud = Noeud(state_after_action[i], node) #, g+1, heurisitque(state_after_action[i]))
+        state_i, pena = state_after_action[i]
+        noeud = Noeud(state_i, node, g+pena, heurisitque(state_i))
         if noeud :
             childrens.append(noeud)
     return childrens
 
-def astar(node0):
+def a_star(node0):
     open = []
     closed = []
 
@@ -311,7 +331,7 @@ def astar(node0):
             if el.cost_f < current.cost_f :
                 current = el
 
-        if goal(current.state): # l'étant courant est l'état final
+        if goal(current.state): # l'état courant est l'état final
             path = []
             while current is not None:
                 path.append(current.state)
@@ -325,11 +345,9 @@ def astar(node0):
 
         for child in children:
             if not (child in closed) :
+                child.cost_f = child.cost_g + child.cost_h
                 if not (child in open) :
                     open.append(child)
-                    child.cost_g = current.cost_g + 1
-                    child.cost_h = heurisitque(child.state)
-                    child.cost_f = child.cost_g + child.cost_h
                 else :
                     if child.cost_g > (current.cost_g +1) :
                         child.cost_g = current.cost_g + 1
@@ -339,3 +357,7 @@ def astar(node0):
 
     return None  # Aucun chemin trouvé
 
+# def parcours(path) :
+    #fonction qui effectue le parcours le plus efficace
+
+# def return_to_0()

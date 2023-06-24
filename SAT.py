@@ -331,7 +331,7 @@ def write_dimacs_file(filename: str, hr):
         for clause in tab:
             file.write(' '.join(str(literal) for literal in clause) + ' 0\n')
 
-
+"""
 hr = HitmanReferee()
 tab, c, N, M = dimacs(hr)
 #print (tab)
@@ -341,3 +341,4 @@ print (M)
 print(var_vide(N,M))
 
 write_dimacs_file('hitman.cnf', hr)
+"""

@@ -1,5 +1,5 @@
 import hitman
-from phase1-LV import *
+from phase1LV import *
 from queue import PriorityQueue
 
 # 0 = North
@@ -84,15 +84,10 @@ def create_state0(plateau, N, M) :
               "civil_range" : civil_range, # liste des cases vues par un gardes
               "piano": piano,
               "suit": suit,
-              "wall" : wall}
+              "wall" : wall,
+              "action" : None}
 
     return state0
-
-#class State :
-
-
-
-
 
 
 def opposite_number(num):
@@ -122,6 +117,7 @@ class Noeud:
         orientation += 1
         if orientation == 4: orientation = 0
         state["hitman"][1] = orientation
+        state["action"] = "turn_clockwise"
         pena = 1
         return state, pena
 
@@ -134,6 +130,7 @@ class Noeud:
         if orientation == -1: orientation = 0
         state["hitman"][1] = orientation
         pena = 1
+        state["action"] = "turn_anti_clockwise"
         return state, pena
 
 
@@ -151,6 +148,7 @@ class Noeud:
         pena = 1,
         if (x,y) in state["guards_range"] :
             pena += 5
+        state["action"] = "move"
         return state, pena
 
     def kill_target(self, state):
@@ -165,6 +163,7 @@ class Noeud:
             pena += 100
         if (x,y) in state["civil_range"] :
             pena += 100
+        state["action"] = "kill_target"
         return state, pena
 
 
@@ -177,16 +176,28 @@ class Noeud:
             if i[0] == (x2, y2):
                 g = True
                 o = i[1]
-        precond = g and (o != opposite_number(o))
+        precond = g and (orientation != opposite_number(o))
         if not precond:
             return None
+
+        #supprime les cases qui étaient regardées par le garde
+        xA, yA = case_ahead(x2, y2, o)
+        if (xA, yA) in state["gards_range"] :
+            state["gards_range"].remove((xA, yA))
+        xA, yA = case_ahead(xA, yA, o)
+        if (xA, yA) in state["gards_range"]:
+            state["gards_range"].remove((xA, yA))
+
+
         state["gards"].remove([(x2, y2), o])
         state["empty"].append((x2, y2))
+
         pena = 21 # 1 point d'action + 20 point pour personne neutralisée
         if (x,y) in state["guard_range"] :
             pena += 100
         if (x,y) in state["civil_range"] :
             pena += 100
+        state["action"] = "kill_guard"
         return state, pena
 
     def kill_civil(self, state):
@@ -198,16 +209,26 @@ class Noeud:
             if i[0] == (x2, y2):
                 c = True
                 o = i[1]
-        precond = c and (o != opposite_number(o))
+
+        precond = c and (orientation != opposite_number(o))
         if not precond:
             return None
+
+        # supprime les cases qui étaient regardées par le civil
+        xA, yA = case_ahead(x2, y2, o)
+        if (xA, yA) in state["civil_range"]:
+            state["civil_range"].remove((xA, yA))
+
         state["civils"].remove([(x2, y2), o])
         state["empty"].append((x2, y2))
+
         pena = 21  # 1 point d'action + 20 point pour personne neutralisée
         if (x, y) in state["guard_range"]:
             pena += 100
         if (x, y) in state["civil_range"]:
             pena += 100
+
+        state["action"] = "kill_civil"
         return state, pena
 
     def get_suit(self, state):
@@ -218,6 +239,7 @@ class Noeud:
         state["empty"].append((x, y))
         state["suit"] = None
         pena = 1
+        state["action"] = "get_suit"
         return state, pena
 
     def get_piano(self, state):
@@ -228,6 +250,7 @@ class Noeud:
         state["empty"].append((x, y))
         state["piano"] = "got"
         pena = 1
+        state["action"] = "get_piano"
         return state, pena
 
     def wear_suit(self, state):
@@ -241,6 +264,7 @@ class Noeud:
             pena += 100
         if (x, y) in state["civil_range"]:
             pena += 100
+        state["action"] = "wear_suit"
         return state, pena
 
 
@@ -302,7 +326,7 @@ def h_move(state) : #calcul de l'heuristique pour avancer
     return abs(xT-xH) + abs(yT-yH)
 
 
-def initial_node(state, h, N, M) :
+def initial_node(plateau, N, M) :
     node0 = Noeud(create_state0(plateau,N,M))
     return node0
 
@@ -356,6 +380,34 @@ def a_star(node0):
                     child.cost_f = child.cost_g + child.cost_h
 
     return None  # Aucun chemin trouvé
+
+def state_to_action(path, hr) :
+    for mov in path :
+        if mov.state["action"] == "turn_clockwise" :
+            hr.turn_clockwise()
+        if mov.state["action"] == "turn_anti_clockwise":
+            hr.turn_anti_clockwise()
+        if mov.state["action"] == "move":
+            hr.move()
+        if mov.state["action"] == "kill_target":
+            hr.kill_target()
+        if mov.state["action"] == "kill_guard":
+            hr.neutralize_guard()
+        if mov.state["action"] == "kill_civil":
+            hr.neutralize_civil()
+        if mov.state["action"] == "get_suit":
+            hr.take_suit()
+        if mov.state["action"] == "get_piano":
+            hr.take_weapon()
+        if mov.state["action"] == "wear_suit":
+            hr.put_on_suit()
+
+
+hr = HitmanReferee()
+b, score, history, map = hr.end_phase1()
+print (map)
+#state0 = create_state0(map, M, N)
+
 
 # def parcours(path) :
     #fonction qui effectue le parcours le plus efficace

@@ -32,6 +32,7 @@ liste = model_plateau(6, 7)
 
 
 def main():
+    """
     hr = HitmanReferee()
     status = hr.start_phase1()
     pprint(status)
@@ -75,7 +76,7 @@ def main():
     pprint(hr.send_content(complete_map_example))
     complete_map_example[(7, 0)] = HC.EMPTY
     pprint(hr.send_content(complete_map_example))
-
+"""
 
 
 if __name__ == "__main__":

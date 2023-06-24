@@ -18,7 +18,9 @@ def var_vide(N, M):
     res = []
     for i in range(N):
         for j in range(M):
-            res.append(13 * i * M + 13 * j + 1)
+            res.append(13 * (i * M + j) + 1)
+            print(f"var_vide({i},{j}) = {13 * (i * M + j) + 1}")
+            print(f"M = {M}, N = {N}, i = {i}, j = {j}")
     return res
 
 
@@ -26,7 +28,9 @@ def var_civilN(N, M):
     res = []
     for i in range(N):
         for j in range(M):
-            res.append(13 * i * M + 13 * j + 2)
+            res.append(13 * (i * M + j) + 2)
+            print(f"var_civilN({i},{j}) = {13 * (i * M + j) + 2}")
+            print(f"M = {M}, N = {N}, i = {i}, j = {j}")
     return res
 
 
@@ -34,7 +38,9 @@ def var_civilE(N, M):
     res = []
     for i in range(N):
         for j in range(M):
-            res.append(13 * i * M + 13 * j + 3)
+            res.append(13 * (i * M + j) + 3)
+            print(f"var_civilE({i},{j}) = {13 * (i * M + j) + 3}")
+            print(f"M = {M}, N = {N}, i = {i}, j = {j}")
     return res
 
 
@@ -42,7 +48,9 @@ def var_civilS(N, M):
     res = []
     for i in range(N):
         for j in range(M):
-            res.append(13 * i * M + 13 * j + 4)
+            res.append(13 * (i * M + j) + 4)
+            print(f"var_civilS({i},{j}) = {13 * (i * M + j) + 4}")
+            print(f"M = {M}, N = {N}, i = {i}, j = {j}")
     return res
 
 
@@ -50,7 +58,9 @@ def var_civilW(N, M):
     res = []
     for i in range(N):
         for j in range(M):
-            res.append(13 * i * M + 13 * j + 5)
+            res.append(13 * (i * M + j) + 5)
+            print(f"var_civilW({i},{j}) = {13 * (i * M + j) + 5}")
+            print(f"M = {M}, N = {N}, i = {i}, j = {j}")
     return res
 
 
@@ -58,7 +68,9 @@ def var_guardN(N, M):
     res = []
     for i in range(N):
         for j in range(M):
-            res.append(13 * i * M + 13 * j + 6)
+            res.append(13 * (i * M + j) + 6)
+            print(f"var_guardN({i},{j}) = {13 * (i * M + j) + 6}")
+            print(f"M = {M}, N = {N}, i = {i}, j = {j}")
     return res
 
 
@@ -66,7 +78,9 @@ def var_guardE(N, M):
     res = []
     for i in range(N):
         for j in range(M):
-            res.append(13 * i * M + 13 * j + 7)
+            res.append(13 * (i * M + j) + 7)
+            print(f"var_guardE({i},{j}) = {13 * (i * M + j) + 7}")
+            print(f"M = {M}, N = {N}, i = {i}, j = {j}")
     return res
 
 
@@ -74,7 +88,9 @@ def var_guardS(N, M):
     res = []
     for i in range(N):
         for j in range(M):
-            res.append(13 * i * M + 13 * j + 8)
+            res.append(13 * (i * M + j) + 8)
+            print(f"var_guardS({i},{j}) = {13 * (i * M + j) + 8}")
+            print(f"M = {M}, N = {N}, i = {i}, j = {j}")
     return res
 
 
@@ -82,7 +98,9 @@ def var_guardW(N, M):
     res = []
     for i in range(N):
         for j in range(M):
-            res.append(13 * i * M + 13 * j + 9)
+            res.append(13 * (i * M + j) + 9)
+            print(f"var_guardW({i},{j}) = {13 * (i * M + j) + 9}")
+            print(f"M = {M}, N = {N}, i = {i}, j = {j}")
     return res
 
 
@@ -90,7 +108,7 @@ def var_mur(N, M):
     res = []
     for i in range(N):
         for j in range(M):
-            res.append(13 * i * M + 13 * j + 10)
+            res.append(13 * (i * M + j) + 10)
     return res
 
 
@@ -98,7 +116,7 @@ def var_corde(N, M):
     res = []
     for i in range(N):
         for j in range(M):
-            res.append(13 * i * M + 13 * j + 11)
+            res.append(13 * (i * M + j) + 11)
     return res
 
 
@@ -106,7 +124,7 @@ def var_costume(N, M):
     res = []
     for i in range(N):
         for j in range(M):
-            res.append(13 * i * M + 13 * j + 12)
+            res.append(13 * (i * M + j) + 12)
     return res
 
 
@@ -114,7 +132,7 @@ def var_cible(N, M):
     res = []
     for i in range(N):
         for j in range(M):
-            res.append(13 * i * M + 13 * j + 13)
+            res.append(13 * (i * M + j) + 13)
     return res
 
 
@@ -184,18 +202,16 @@ def position_to_num_case(x, y, M):
 
 
 def unique_element_par_case_i(x, y, M):
-    # retourne une liste de clauses il y a un unique element dans cette case
+    # retourne une liste de clauses avec au moins un élément dans cette case
     case = position_to_num_case(x, y, M)
     res = []
-    for var in range(13):
-        for autre_var in range(var + 1, 13):
-            clause = [-13 * case - var, -13 * case - autre_var]
-            res.append(clause)
+    clause = [13 * case + var for var in range(1, 14)]
+    res.append(clause)
     return res
 
 
 def unique_element_par_case_plateau(N, M):
-    # retourne une liste de clauses : un seul élément oar case du plateau
+    # retourne une liste de clauses : au moins un élément par case du plateau
     res = []
     for i in range(N):
         for j in range(M):
@@ -239,8 +255,8 @@ def exactement_nb_vraies(liste, nb):
 
     # Exactement nb variables doivent être vraies
     combinations = itertools.combinations(liste, nb)
-    for combination in combinations:
-        clause = [-var for var in liste if var not in combination]
+    for comb in combinations:
+        clause = [-var for var in liste if var not in comb]
         res.append(clause)
 
     return res
@@ -258,41 +274,45 @@ def exactement_nb_civils(nb, N, M):
 
 def vision_to_dimacs(filename, x, y, vue, N, M):
     case = position_to_num_case(x, y, M)
-    print(vue)
-    print(case)
     var = None
     if vue == HC.EMPTY:
-        print(var_vide(N, M))
         var = var_vide(N, M)[case]
+
     elif vue == HC.CIVIL_E:
         var = var_civilE(N, M)[case]
-    elif vue == HC.CIVIL_N:
-        var = var_civilN(N, M)[case]
     elif vue == HC.CIVIL_S:
         var = var_civilS(N, M)[case]
     elif vue == HC.CIVIL_W:
         var = var_civilW(N, M)[case]
+    elif vue == HC.CIVIL_N:
+        var = var_civilN(N, M)[case]
+
     elif vue == HC.GUARD_E:
         var = var_guardE(N, M)[case]
-    elif vue == HC.GUARD_N:
-        var = var_guardN(N, M)[case]
-    elif vue == HC.GUARD_W:
-        var = var_guardW(N, M)[case]
     elif vue == HC.GUARD_S:
         var = var_guardS(N, M)[case]
+    elif vue == HC.GUARD_W:
+        var = var_guardW(N, M)[case]
+    elif vue == HC.GUARD_N:
+        var = var_guardN(N, M)[case]
+
     elif vue == HC.PIANO_WIRE:
         var = var_corde(N, M)[case]
+
     elif vue == HC.SUIT:
         var = var_costume(N, M)[case]
+
     elif vue == HC.WALL:
         var = var_mur(N, M)[case]
+
     elif vue == HC.TARGET:
         var = var_cible(N, M)[case]
 
     if var is not None:
+        print(var)
         with open(filename, 'a') as file:
-            print(var)
             file.write(str(var) + ' 0\n')
+
 
 def dimacs(hr):
     status = hr.start_phase1()
@@ -317,7 +337,7 @@ def dimacs(hr):
     for el in exactement_nb_gardes(gardes, N, M):
         tab.append(el)
         c += 1
-    for el in exactement_nb_civils(civils, N, M) :
+    for el in exactement_nb_civils(civils, N, M):
         tab.append(el)
         c += 1
     return tab, c, N, M
@@ -332,7 +352,7 @@ def write_dimacs_file(filename: str, hr):
             file.write(' '.join(str(literal) for literal in clause) + ' 0\n')
 
 
-hr = HitmanReferee()
+"""hr = HitmanReferee()
 tab, c, N, M = dimacs(hr)
 #print (tab)
 print (c)
@@ -340,4 +360,4 @@ print (N)
 print (M)
 print(var_vide(N,M))
 
-write_dimacs_file('hitman.cnf', hr)
+write_dimacs_file('hitman.cnf', hr)"""

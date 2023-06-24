@@ -64,15 +64,25 @@ def voir(vision, plateau):  # remplit le tableau de ce qui est vu
     M = len(plateau) - 1
     N = len(plateau[0]) - 1
     for i in vision:
-        x = M - i[0][1]
+        x = i[0][1]
         y = i[0][0]
-        print(x)
-        print(y)
-        plateau[x][y] = i[1]
-        print("dans voir")
-        print(i[1])
-        vision_to_dimacs('hitman.cnf', x, y, i[1], N, M)
+        plateau[M - x][y] = i[1]
     pass
+
+
+def parcours_plateau_dimacs(plateau, case_parcouru):
+    M = len(plateau) - 1
+    N = len(plateau[0]) - 1
+    for x in range(M + 1):
+        for y in range(N + 1):
+            case = plateau[M - x][y]
+            if not ((y, x) in case_parcouru):
+                if case == HC.EMPTY or case == HC.WALL or case == HC.SUIT or case == HC.PIANO_WIRE or case == HC.TARGET or case == HC.CIVIL_N or case == HC.CIVIL_S or case == HC.CIVIL_E or case == HC.CIVIL_W or case == HC.GUARD_N or case == HC.GUARD_S or case == HC.GUARD_E or case == HC.GUARD_W:
+                    print(y, x)
+                    print(case_parcouru)
+                    vision_to_dimacs("hitman.cnf", x, y, case, N + 1, M + 1)
+                    case_parcouru.append((y, x))
+    return case_parcouru
 
 
 def entendre(position, entend, plateau):
@@ -130,6 +140,7 @@ def entendre(position, entend, plateau):
 
 
 # -----------------------------------------MOUVEMENT HITMAN------------------------------------------------------------#
+
 def turn_clockwise(hr, plateau):
     hr.turn_clockwise()
     (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
@@ -212,6 +223,7 @@ def count_personne_decouverte(tableau):
 
 def solve_cnf(file_path):
     command = ['gophersat.exe', file_path]  # Remplacez 'solver.exe' par le chemin du solveur SAT externe
+    # command = ['/Users/lilianvalin/Library/CloudStorage/OneDrive-etu.utc.fr/P23/IA02/Projet/ia02-hitman/gophersat-3', file_path]  # Remplacez 'solver.exe' par le chemin du solveur SAT externe
     result = subprocess.run(command, capture_output=True, text=True)
 
     if result.returncode == 0:
@@ -222,10 +234,9 @@ def solve_cnf(file_path):
         print(error)
 
 
-
 # -----------------------------------------PARCOURS PLATEAU------------------------------------------------------------#
 
-def parcours_plateau(hr, plateau):
+def parcours_plateau(hr, plateau, case_parcouru):
     (vision, position, orientation, hear, penalties, guard_range) = call_arbitre(hr)
 
     M = len(plateau) - 1
@@ -233,10 +244,12 @@ def parcours_plateau(hr, plateau):
 
     y_pos, x_pos = position
     tmp = plateau[M - x_pos][y_pos]
-    plateau[M - x_pos][y_pos] = f"{Fore.RED}    HITMAN    {Style.RESET_ALL}"
 
-    voir(vision, plateau)
     entendre(position, hear, plateau)
+    voir(vision, plateau)
+    plateau[M - x_pos][y_pos] = f"{Fore.RED}    HITMAN    {Style.RESET_ALL}"
+    case_parcouru = parcours_plateau_dimacs(plateau, case_parcouru)
+    print(case_parcouru)
     print_plateau(plateau)
     print(f"Position de Hitman : {position}")
     print(f"Orientation de Hitman : {orientation}")
@@ -275,7 +288,8 @@ def parcours_plateau(hr, plateau):
     choix_tab = []
 
     for i in range(len(vision)):
-        if vision[i][1] == HC.EMPTY or vision[i][1] == "personne" or vision[i][1] == "non_etudie" or vision[i][1] == HC.CIVIL_N or vision[i][1] == HC.CIVIL_S or vision[i][1] == HC.CIVIL_E or vision[i][1] == HC.CIVIL_W:
+        if vision[i][1] == HC.EMPTY or vision[i][1] == "personne" or vision[i][1] == "non_etudie" or vision[i][
+            1] == HC.CIVIL_N or vision[i][1] == HC.CIVIL_S or vision[i][1] == HC.CIVIL_E or vision[i][1] == HC.CIVIL_W:
             choix_tab.append(0)
 
     if (case_droite != None) and (
@@ -292,23 +306,23 @@ def parcours_plateau(hr, plateau):
             print("Hitman avance")
             garde_range = move(hr, plateau)
             points = 1
-            return points, garde_range
+            return points, garde_range, case_parcouru
         elif choix == 1:
             print("Hitman tourne à droite et avance")
             garde_range = turn_clockwise(hr, plateau)
             points = 2
-            return points, garde_range
+            return points, garde_range, case_parcouru
         else:
             print("Hitman tourne à gauche et avance")
             garde_range = turn_anti_clockwise(hr, plateau)
             points = 2
-            return points, garde_range
+            return points, garde_range, case_parcouru
     else:
         # Implémenter fonction demi-tour pour éviter que hitman soit bloqué.
         print("Hitman fait demi-tour")
         garde_range = U_turn(hr, plateau)
         points = 2
-        return points, garde_range
+        return points, garde_range, case_parcouru
 
 
 # -----------------------------------------RUN------------------------------------------------------------------------#
@@ -321,17 +335,17 @@ def main():
 
     points_parcours = 0
     point_garde_range = 0
+    case_parcouru = []
     while (cases_non_etudie(plateau) or not cases_target(plateau)) and count_personne_decouverte(
             plateau) != guard_count + civil_count:  # Teste s'il reste des cases vides et si on a trouvé la cible.
-        points_action, garde_range = parcours_plateau(hr, plateau)
+        points_action, garde_range, case_parcouru = parcours_plateau(hr, plateau, case_parcouru)
         points_parcours += points_action
         if garde_range:
             points_action += 5
             point_garde_range += 1
             print(f"Hitman a été vu !!")
         print(f"Point d'action : {points_parcours}")
-        print(
-            "----------------------------------------------------------------------------------------------------------------")
+        print("----------------------------------------------------------------------------------------------------------------")
     solve_cnf("hitman.cnf")
     return plateau, points_parcours, point_garde_range
 
@@ -344,17 +358,19 @@ for i in range(1):
     point_parc.append(points_parcours)
     point_garde.append(point_garde_range)
 
-print(f"moyenne points parcours : {sum(point_parc)/len(point_parc)}")
-print(f"moyenne points garde : {sum(point_garde)/len(point_garde)}")
+print(f"moyenne points parcours : {sum(point_parc) / len(point_parc)}")
+print(f"moyenne points garde : {sum(point_garde) / len(point_garde)}")
 
-
-print("--------------------------------------------------PLATEAU FINAL-------------------------------------------------")
+print(
+    "--------------------------------------------------PLATEAU FINAL-------------------------------------------------")
+# case_dimacs =[]
+# parcours_plateau_dimacs(plateau, case_dimacs)
 print_plateau(plateau)
 print(f"Point d'action : {points_parcours}")
 print(f"Nombre de fois ou Hitman a été vue : {point_garde_range}")
 
-
-#
-#Implémenter un tableau avec les cases que voient les gardes
-#Implémenter le solveur SAT
-#Améliorer entendre
+# Mettre les cases vue dans le SAT V
+# Implémenter un tableau avec les cases que voient les gardes
+# Implémenter le solveur SAT
+# Améliorer entendre
+# Resoudre bug infini

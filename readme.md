@@ -7,7 +7,7 @@ Phase 1 :
 Pour la phase 1, nous effectuons tout d'abord un premier appel à l'arbitre qui nous renvoie les informations importantes qui ne changeront pas lors de notre parcours (nombre de gardes et de civils, taille du plateau (N, M), etc). Nous créons ensuite, grâce à ces information, un tableau de taille N*M représentant le plateau en cours d'exploration. Nous initialisons chacunes de ses cases à "non-étudié".
 
 Ensuite, nous nous déplaçons dans le plateau en récupérant, après chaque action, les informations données par l'arbitre sur ce qui nous entoure :
-     - la vue : nous ajoutons dans notre tableau les informations renvoyées par la vue.
+ - la vue : nous ajoutons dans notre tableau les informations renvoyées par la vue.
      - l'ouie : nous interprétons ce que nous entendons : 
         - rien : cela signifie qu'il n'y a personne autour donc on met les cases non-étudiés (ou contenant peut être quelqu'un) qui entourent Hitman à "personne".
         - autant de personnes que le nombre de personnes que nous connaissons dans notre périmètre : on passe toutes les cases inconues à "personne"
@@ -54,6 +54,8 @@ Les faiblesses de notre phase 1 sont que nous avons eu du mal à connecter SAT a
 
 Le point fort de la phase 1 est qu'elle arrive toujours à trouver la carte complete (et correcte), probablement grâce au random qui permet qu'Hitman se débloque et ne tourne pas en rond sans fin. De plus, les scores sont parfois très bons, mais cela relève de l'aléatoire.
 
+
+Phase 2 :
 
 
 

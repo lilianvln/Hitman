@@ -235,8 +235,11 @@ class Noeud:
 
     def get_suit(self, state):
         x, y = state["hitman"][0]
-        precond = (x, y) == state["suit"][0]
-        if not precond:
+        if state["suit"] and len(state["suit"]) > 0:
+            precond = (x, y) == state["suit"][0]
+            if not precond:
+                return None
+        else:
             return None
         state["empty"].append((x, y))
         state["suit"] = None
@@ -421,7 +424,6 @@ def state_to_action(path, hr):
 
 
 hr = HitmanReferee()
-#b, score, history, map = hr.end_phase1()
 game_status = hr.start_phase1()
 
 game_map = [

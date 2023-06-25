@@ -34,6 +34,7 @@ Pour faire la modélisation SAT, nous avons choisi, pour chaque case, d'associer
  - 11 : corde de piano
  - 12 : costume 
  - 13 : cible
+
 Et ainsi de suite pour les autres cases.
 
 Ensuite, nous avons repris les contraintes du sujets et les avons mis sous forme de CNF pour ensuite pouvoir les importer dans le DIMACS :

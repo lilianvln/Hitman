@@ -1,0 +1,96 @@
+Modélisation STRIPS : 
+
+Prédicats :
+
+wall /2 (position x, position y) : la case (x,y) contient un mur
+adjacent /5 (x1, y1, x2, y2, o) : la case 1 est adjacente à la case 2 du coté o
+adj_horaire /2 (o1, o2)  : l’orientation o1 suit o2 quand on tourne dans le sens des aiguiles d’une montre
+orientation/1 (o) : o est une orientation
+is_hitman/1 : la variable est hitman
+face/2 (o1, o2) : les orientations o1 et o2 se font face  
+
+
+Fluents :
+
+hitman /2 (x, y) : hitman se trouve dans la case (x, y)
+target /2 (x, y) : la cible se situe dans la case (x, y),  (-1, -1) si la cible a été tuée
+wear_suit /1 (a) : a porte le costume
+guard /3 (x, y, O) : un garde orienté O se trouve dans la case (x, y)
+civil /3 (x, y, O) : un civil orienté O se trouve dans la case (x, y)
+guard_range /2 (x, y)  : la case (x,y) est vue par un garde 
+civil_range /2 (x,y)  : la case (x,y) est vue par un civil 
+empty /2 (x, y) : la case (x, y) est vide
+piano /2 (x, y) : la corde de piano se trouve dans la case (x, y), (-1, -1) si hitman à la corde de piano
+suit /2 (x, y) : le costume se trouve dans la case (x, y) (-1, -1) si hitman à la corde de piano
+
+
+Etat initial :
+
+is_hitman(Hitman)
+orientation(N)
+orientation(E)
+orientation(S)
+orientation(W)
+face(N, S)
+face(S, N)
+face(E, W)
+face(W,E)
+adj_horaire(E, N)
+adj_horaire(S, E)
+adj_horaire(W, S)
+adj_horaire(N, W)
+hitman(0, 0, N)
+target(x, y) : x !=  -1 et y != -1
+- wear_suit(Hitman)
+guard(x, y, O) : pour tous les gardes présents sur la map
+civils(x, y, O) : pour tous les civils présents sur la map
+empty(x, y) : pour toutes les cases vides
+piano(x, y) : avec x et y != -1 
+suit(x, y) : avec x et y != -1 
+
+
+(A rajouter pour le décompte des points (mais trop compliqué à implémenter dans la modélisation STRIPS) :
+guard_range(x, y) : pour tous les cases vues par un garde
+civil_range(x, y) : pour tous les cases vues par un civil)
+
+
+Goal : hitman(0,0) ^ target(-1, -1)
+
+
+Actions : 
+
+turn_clockwise(x, y, O1, O2) : 
+    Preconditions : hitman(x, y, O1) ^ orientation(O1) ^ orientation(O2) ^ adj_horaire(O2, O1) 
+    Effets : -hitman(x, y, O1) ^ hitman(x, y, O2)
+
+turn_anti_clockwise(x, y, O1, O2) : 
+    Preconditions : hitman(x,y, O1) ^ orientation(O1) ^ orientation(O2) ^ adj_horaire(O1, O2)
+    Effets : -hitman(x, y, O1) ^ hitman(x, y, O2)
+
+move(x1, y1, x2, y2) :
+    Preconditions :  hitman(x1, y1, O) ^ -guard(x2, y2) ^ -wall(x2, y2) ^ adjacent(x2, y2, x1, y1, O) 
+    Effets : hitman(x2, y2, O) ^ - hitman(x1, y1, O)
+
+kill_target(x, y) : 
+    Preconditions : hitman(x, y, O) ^ target(x, y) ^ piano(-1, -1) ^ - target(-1, -1) 
+    Effets : target(-1, -1) ^ - target(x, y) 
+
+kill_guard(xH, yH, xG, yG, xR1, yR1, xR2, yR2) : 
+    Preconditions : hitman(xH, yH, oH) ^ guard(xG, yG, oG) ^ adjacent(xG, yG, xH, yH, oH) ^ - face(oH, oG)
+    Effets : - guard(xG, yG, oG) ^ empty(xG, yG) 
+
+kill_civil(xH, yH, xC, yC, oH, xR, yR) : 
+    Preconditions : hitman(xH, yH, oH) ^ guard(xG, yG, oG) ^ adjacent(xG, yG, xH, yH, oH) ^ - face(oH, oG)
+    Effets : empty(xG, yG) ^ -civil_range(xR, yR)
+
+get_suit(x, y) : 
+    Préconditions : hitman(x, y, o) ^ suit(x, y)
+    Effets : - suit(x, y) ^ suit(-1, -1)
+
+get_piano(x, y) : 
+    Préconditions : hitman(x, y, o) ^ piano(x, y)
+    Effets : -piano(x, y) ^ piano(-1, -1) 
+
+wear_suit(Hitman) : 
+    Precondition : suit(-1, -1) ^ hitman(Hitman)
+    Effets : wear_suit(hitman) ^ - suit(-1, -1)

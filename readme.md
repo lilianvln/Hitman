@@ -58,5 +58,22 @@ Le point fort de la phase 1 est qu'elle arrive toujours à trouver la carte comp
 
 Phase 2 :
 
+Pour la phase 2, nous avons tout d'abord commencé par la modélisation en STRIPS que vous trouverez ci-joint. Nous avons ensuite converti cette modélisation de python afin de pouvoir effectuer la phase 2 et chercher le meilleur chemin pour Hitman grâce à un algorithme A*. 
+
+Pour cela, nous créons un état initial qui reprend toutes les informations de la map obtenue à la fin de la phase 1. Ces informations sont stockées dans un dictionaire état qui correspond à tous les fluents de notre STRIPS. Nous créons aussi une fonction goal qui renvoie True si l'état qu'on lui fournis correspond à Hitman en (0,0) et cible tuée.
+Nous créons ensuite une classe Noeud ayant pour méthodes toutes les actions possibles. Ces méthodes ont étes implémentées suivant notre modélisation STRIPS. Chaque action crée un nouvel état et retourne le nombre de pénalités associées à cette action. 
+
+Nous implémentons ensuite un algorithme A* qui part de l'état initial et essaye d'aller à l'état final. Pour cela, nous avons implémenté une fonction qui calcule les heuristiques pour chaque état.
+
+L'algorithme A* est sensé nous retourner une suite d'états correspondant au chemin que doit emprunter Hitman pour aller tuer la cible. Nous avons ensuite une fonction qui converti cette suite d'états en suite d'action que doit réaliser hitman.
+Mais malheuresement, malgrès de nombreux efforts de notre part, notre algorithme A* ne fonctionne pas et n'arrive pas à renvoyer de chemin donc notre phase 2 n'abouti pas.
+
+Le gros point faible de la phase 2 est qu'elle ne fonctionne pas. 
+
+
+Globalement, les points faibles de notre programmes sont que nous n'avons pas réussi à faire fonctionner beaucoup de chose et tout n'est donc pas fonctionnels.
+Le point fort de ce projet est que nous avons beaucoup appris.
+
+Pour conclure, ce projet nous a demandé beaucoup d'investissement mais nous n'avons pas réussi à tout rendre fonctionnel par manque de temps. Mais il nous à beaucoup appris et nous a réellement fait découvrir la programation d'intelligences artificielles.
 
 

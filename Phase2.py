@@ -1,13 +1,15 @@
 import hitman
 from phase1LV import *
 from queue import PriorityQueue
+import heapq
+
 
 # 0 = North
 # 1 = East
 # 2 = South
 # 3 = West
 
-plateau, points_parcours, point_garde_range = main()
+# plateau, points_parcours, point_garde_range = main()
 
 def create_state0(plateau, N, M) :
     guards = []
@@ -330,52 +332,62 @@ def initial_node(plateau, N, M) :
     node0 = Noeud(create_state0(plateau,N,M))
     return node0
 
-def generate_children(node) :
+def generate_children(node):
     childrens = []
-    state = node.state
-    g = node.cost_g
-    state_after_action = [node.turn_clockwise(state), node.turn_anti_clockwise(state), node.move(state), node.kill_civil(state),
-                          node.kill_guard(state), node.kill_target(state), node.get_suit(state), node.get_piano(state), node.wear_suit]
-    for i in range (9) :
+    state = node
+    g = 0
+    state_after_action = [
+        node.turn_clockwise(state),
+        node.turn_anti_clockwise(state),
+        node.move(state),
+        node.kill_civil(state),
+        node.kill_guard(state),
+        node.kill_target(state),
+        node.get_suit(state),
+        node.get_piano(state),
+        node.wear_suit
+    ]
+    for i in range(9):
         state_i, pena = state_after_action[i]
         noeud = Noeud(state_i, node, g+pena, heurisitque(state_i))
-        if noeud :
+        if noeud:
             childrens.append(noeud)
     return childrens
 
 def a_star(node0):
-    open = []
+    open_dict = []
     closed = []
 
-    open.append(node0)
+    open_dict.append(node0)
 
-    while not open.empty():
-        current = open[0]
-        for el in open :
-            if el.cost_f < current.cost_f :
-                current = el
+    while open_dict:
+        current = open_dict[0]
+        if len(open_dict) > 1:
+            for el in open_dict:
+                if el.cost_f < current.cost_f:
+                    current = el
 
-        if goal(current.state): # l'état courant est l'état final
+        if goal(current):  # l'état courant est l'état final
             path = []
             while current is not None:
-                path.append(current.state)
+                path.append(current)
                 current = current.parent
             path.reverse()
-            return path # retourne une liste d'états correspondant au chemin le plus efficace
+            return path  # retourne une liste d'états correspondant au chemin le plus efficace
 
-        closed.add(current.state)
+        closed.append(current)
 
-        children = generate_children(current) # tous les mouvement possibles
+        children = generate_children(current)  # tous les mouvements possibles
 
         for child in children:
-            if not (child in closed) :
+            if not (child in closed):
                 child.cost_f = child.cost_g + child.cost_h
-                if not (child in open) :
-                    open.append(child)
+                if not (child in open_dict):
+                    open_dict.append(child)
                 else :
-                    if child.cost_g > (current.cost_g +1) :
+                    if child.cost_g > (current.cost_g +1):
                         child.cost_g = current.cost_g + 1
-                    if child.cost_h > heurisitque(child.state) :
+                    if child.cost_h > heurisitque(child.state):
                         child.cost_h = heurisitque(child.state)
                     child.cost_f = child.cost_g + child.cost_h
 
@@ -403,13 +415,24 @@ def state_to_action(path, hr) :
             hr.put_on_suit()
 
 
+
+
 hr = HitmanReferee()
-b, score, history, map = hr.end_phase1()
-print (map)
-#state0 = create_state0(map, M, N)
+#b, score, history, map = hr.end_phase1()
+game_status = hr.start_phase1()
 
+game_map = [
+    [HC.EMPTY, HC.EMPTY, HC.EMPTY, HC.SUIT, HC.GUARD_S, HC.WALL, HC.WALL],
+    [HC.EMPTY, HC.WALL, HC.EMPTY, HC.EMPTY, HC.EMPTY, HC.EMPTY, HC.EMPTY],
+    [HC.TARGET, HC.WALL, HC.EMPTY, HC.EMPTY, HC.EMPTY, HC.CIVIL_N, HC.EMPTY],
+    [HC.WALL, HC.WALL, HC.EMPTY, HC.GUARD_E, HC.EMPTY, HC.CIVIL_E, HC.CIVIL_W],
+    [HC.EMPTY, HC.EMPTY, HC.EMPTY, HC.EMPTY, HC.EMPTY, HC.EMPTY, HC.EMPTY],
+    [HC.EMPTY, HC.EMPTY, HC.WALL, HC.WALL, HC.EMPTY, HC.PIANO_WIRE, HC.EMPTY],
+]
+print_plateau(game_map)
+M = len(game_map)
+N = len(game_map[0])
 
-# def parcours(path) :
-    #fonction qui effectue le parcours le plus efficace
-
-# def return_to_0()
+state0 = create_state0(game_map, N, M)
+res_a_star = a_star(state0)
+print(res_a_star)

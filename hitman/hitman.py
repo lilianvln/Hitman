@@ -134,21 +134,21 @@ complete_map_example0 = {
 }
 
 world_example1 = [
-    [HC.GUARD_E, HC.EMPTY, HC.CIVIL_S],
-    [HC.PIANO_WIRE, HC.EMPTY, HC.SUIT],
-    [HC.EMPTY, HC.TARGET, HC.WALL]
+    [HC.GUARD_N, HC.CIVIL_N, HC.EMPTY],
+    [HC.PIANO_WIRE, HC.EMPTY, HC.EMPTY],
+    [HC.EMPTY, HC.EMPTY, HC.TARGET],
 ]
 
 complete_map_example1 = {
-    (0, 2):HC.GUARD_E,
-    (1, 2):HC.EMPTY,
-    (2, 2):HC.CIVIL_S,
+    (0, 2):HC.GUARD_N,
+    (1, 2):HC.CIVIL_N,
+    (2, 2):HC.EMPTY,
     (0, 1):HC.PIANO_WIRE,
     (1, 1):HC.EMPTY,
-    (2, 1):HC.SUIT,
+    (2, 1):HC.EMPTY,
     (0, 0):HC.EMPTY,
     (1, 0):HC.TARGET,
-    (2, 0):HC.WALL
+    (2, 0):HC.EMPTY
 }
 
 

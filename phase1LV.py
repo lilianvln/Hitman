@@ -350,7 +350,7 @@ def main():
     return plateau, points_parcours, point_garde_range
 
 
-# -----------------------------------------MAIN------------------------------------------------------------------------#
+"""# -----------------------------------------MAIN------------------------------------------------------------------------#
 point_parc = []
 point_garde = []
 for i in range(1):
@@ -367,7 +367,7 @@ print(
 # parcours_plateau_dimacs(plateau, case_dimacs)
 print_plateau(plateau)
 print(f"Point d'action : {points_parcours}")
-print(f"Nombre de fois ou Hitman a été vue : {point_garde_range}")
+print(f"Nombre de fois ou Hitman a été vue : {point_garde_range}")"""
 
 # Mettre les cases vue dans le SAT V
 # Implémenter un tableau avec les cases que voient les gardes

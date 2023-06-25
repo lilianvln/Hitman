@@ -345,7 +345,8 @@ def main():
             point_garde_range += 1
             print(f"Hitman a été vu !!")
         print(f"Point d'action : {points_parcours}")
-        print("----------------------------------------------------------------------------------------------------------------")
+        print(
+            "----------------------------------------------------------------------------------------------------------------")
     solve_cnf("hitman.cnf")
     return plateau, points_parcours, point_garde_range
 

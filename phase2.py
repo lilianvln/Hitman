@@ -1,5 +1,5 @@
 import hitman
-from phase1LV import *
+from phase1 import *
 from queue import PriorityQueue
 import heapq
 
@@ -147,15 +147,15 @@ class Noeud:
             if i[0] == (x2, y2):
                 return None
         state["hitman"][0] = (x2, y2)
-        pena = 1,
-        if (x,y) in state["guards_range"] :
+        pena = 1
+        if (x, y) in state["guard_range"]:
             pena += 5
         state["action"] = "move"
         return state, pena
 
     def kill_target(self, state):
         x, y = state["hitman"][0]
-        xT, yT = state["target"]
+        xT, yT = state["target"][0]
         precond = ((xT, yT) == (x, y)) and (state["piano"] == None)
         if not precond:
             return None
@@ -276,6 +276,7 @@ def goal(state):
     return False
 
 def case_ahead(x, y, orientation):
+    x2, y2 = 0, 0
     if orientation == (0 or 2):
         x2 = x
         if orientation == 0:
@@ -332,60 +333,61 @@ def initial_node(plateau, N, M) :
     node0 = Noeud(create_state0(plateau,N,M))
     return node0
 
-def generate_children(node):
+def generate_children(node) :
     childrens = []
-    state = node
-    g = 0
+    state = node.state
+    g = node.cost_g
     state_after_action = [
         node.turn_clockwise(state),
         node.turn_anti_clockwise(state),
-        node.move(state),
+        node.move(state, M, N),
         node.kill_civil(state),
         node.kill_guard(state),
         node.kill_target(state),
         node.get_suit(state),
         node.get_piano(state),
-        node.wear_suit
+        node.wear_suit(state)
     ]
     for i in range(9):
-        state_i, pena = state_after_action[i]
-        noeud = Noeud(state_i, node, g+pena, heurisitque(state_i))
-        if noeud:
-            childrens.append(noeud)
+        if state_after_action[i] != None :
+            state_i, pena = state_after_action[i]
+            noeud = Noeud(state_i, node, g+pena, heurisitque(state_i))
+            if noeud:
+                childrens.append(noeud)
     return childrens
 
 def a_star(node0):
-    open_dict = []
+    open = []
     closed = []
 
-    open_dict.append(node0)
+    open.append(node0)
 
-    while open_dict:
-        current = open_dict[0]
-        if len(open_dict) > 1:
-            for el in open_dict:
+    while open:
+        current = open[0]
+        if len(open) > 1:
+            for el in open:
                 if el.cost_f < current.cost_f:
                     current = el
 
-        if goal(current):  # l'état courant est l'état final
+        if goal(current.state): # l'état courant est l'état final
             path = []
             while current is not None:
-                path.append(current)
+                path.append(current.state)
                 current = current.parent
             path.reverse()
-            return path  # retourne une liste d'états correspondant au chemin le plus efficace
+            return path # retourne une liste d'états correspondant au chemin le plus efficace
 
-        closed.append(current)
+        closed.append(current.state)
 
         children = generate_children(current)  # tous les mouvements possibles
 
         for child in children:
             if not (child in closed):
                 child.cost_f = child.cost_g + child.cost_h
-                if not (child in open_dict):
-                    open_dict.append(child)
-                else :
-                    if child.cost_g > (current.cost_g +1):
+                if not (child in open):
+                    open.append(child)
+                else:
+                    if child.cost_g > (current.cost_g + 1):
                         child.cost_g = current.cost_g + 1
                     if child.cost_h > heurisitque(child.state):
                         child.cost_h = heurisitque(child.state)
@@ -393,9 +395,9 @@ def a_star(node0):
 
     return None  # Aucun chemin trouvé
 
-def state_to_action(path, hr) :
-    for mov in path :
-        if mov.state["action"] == "turn_clockwise" :
+def state_to_action(path, hr):
+    for mov in path:
+        if mov.state["action"] == "turn_clockwise":
             hr.turn_clockwise()
         if mov.state["action"] == "turn_anti_clockwise":
             hr.turn_anti_clockwise()
@@ -417,6 +419,7 @@ def state_to_action(path, hr) :
 
 
 
+
 hr = HitmanReferee()
 #b, score, history, map = hr.end_phase1()
 game_status = hr.start_phase1()
@@ -433,6 +436,5 @@ print_plateau(game_map)
 M = len(game_map)
 N = len(game_map[0])
 
-state0 = create_state0(game_map, N, M)
-res_a_star = a_star(state0)
+res_a_star = a_star(initial_node(game_map, N, M))
 print(res_a_star)

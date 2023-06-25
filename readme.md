@@ -8,11 +8,11 @@ Pour la phase 1, nous effectuons tout d'abord un premier appel à l'arbitre qui 
 
 Ensuite, nous nous déplaçons dans le plateau en récupérant, après chaque action, les informations données par l'arbitre sur ce qui nous entoure :
  - la vue : nous ajoutons dans notre tableau les informations renvoyées par la vue.
-     - l'ouie : nous interprétons ce que nous entendons : 
-        - rien : cela signifie qu'il n'y a personne autour donc on met les cases non-étudiés (ou contenant peut être quelqu'un) qui entourent Hitman à "personne".
-        - autant de personnes que le nombre de personnes que nous connaissons dans notre périmètre : on passe toutes les cases inconues à "personne"
-        - le nombre de personnes entendues moins le nombre de personnes dont on connait l'emplacement est égal au nombres de cases dont on ne connait pas le contenu : on ajoute au tableau, dans les cases inconues du périmètre "qqn_sur" car les personnes entendues sont forcément sur ces cases là.
-        - sinon, on entend des gens mais on ne peut pas savoir où ils sont : on ajoute "qqn_pe" dans les cases non_étudiées du périmètre.
+ - l'ouie : nous interprétons ce que nous entendons : 
+    - rien : cela signifie qu'il n'y a personne autour donc on met les cases non-étudiés (ou contenant peut être quelqu'un) qui entourent Hitman à "personne".
+    - autant de personnes que le nombre de personnes que nous connaissons dans notre périmètre : on passe toutes les cases inconues à "personne"
+    - le nombre de personnes entendues moins le nombre de personnes dont on connait l'emplacement est égal au nombres de cases dont on ne connait pas le contenu : on ajoute au tableau, dans les cases inconues du périmètre "qqn_sur" car les personnes entendues sont forcément sur ces cases là.
+    - sinon, on entend des gens mais on ne peut pas savoir où ils sont : on ajoute "qqn_pe" dans les cases non_étudiées du périmètre.
 
 Pour nous déplacer, nous mettons dans un tableau toutes les actions possibles pour Hitman puis nous choisissons aléatoirement l'action qu'il va effectuer. Si il est bloqué de tous les cotés, il va faire demi-tour. Petit à petit, notre tableau va se remplir, en grande partie grâce à la vision pour finalement être completement découvert.
 
